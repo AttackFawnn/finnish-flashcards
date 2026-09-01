@@ -313,6 +313,13 @@
             }
         }
 
+        .flip-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -872,12 +879,14 @@
                             )}
                         </div>
 
+                        <div className="flip-hint">tap to flip</div>
+
                         <div className="action-buttons">
-                            <button className={`action-btn ${selectedAction === 'remove' ? 'selected' : ''}`} onClick={handleRemove}>
-                                ✓ Got it!
-                            </button>
                             <button className={`action-btn danger ${selectedAction === 'keep' ? 'selected' : ''}`} onClick={handleKeep}>
                                 ✗ Try again
+                            </button>
+                            <button className={`action-btn ${selectedAction === 'remove' ? 'selected' : ''}`} onClick={handleRemove}>
+                                ✓ Got it!
                             </button>
                         </div>
                     </div>
