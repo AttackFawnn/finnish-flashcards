@@ -217,22 +217,20 @@
         }
 
         .card {
+            position: relative;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 15px;
             padding: 40px 20px;
-            text-align: center;
             margin: 30px 0;
             min-height: 250px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
             user-select: none;
         }
 
-        .card.flipped {
+        .card.english {
             background: linear-gradient(135deg, #4a5aa8 0%, #523370 100%);
         }
 
@@ -241,14 +239,22 @@
         }
 
         .card-label {
+            position: absolute;
+            top: 15px;
+            left: 20px;
             font-size: 12px;
             opacity: 0.8;
-            margin-bottom: 10px;
             letter-spacing: 1px;
             text-transform: uppercase;
+            text-align: left;
         }
 
         .card-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             font-size: 32px;
             font-weight: bold;
             word-wrap: break-word;
@@ -736,6 +742,9 @@
                 if (!card) return null;
 
                 const { front, frontLabel, back, backLabel } = getCardDisplay();
+                const displayedLabel = isFlipped ? backLabel : frontLabel;
+                const displayedContent = isFlipped ? back : front;
+                const isEnglish = displayedLabel === 'ENGLISH';
 
                 return (
                     <div 
@@ -754,16 +763,13 @@
                             </div>
                         </div>
 
-                        <div 
-                            className={`card ${isFlipped ? 'flipped' : ''}`} 
+                        <div
+                            className={`card ${isEnglish ? 'english' : ''}`}
                             onClick={() => setIsFlipped(!isFlipped)}
                             style={{cursor: 'pointer'}}
                         >
-                            <div className="card-label">{isFlipped ? backLabel : frontLabel}</div>
-                            <div className="card-content">{isFlipped ? back : front}</div>
-                            <div style={{fontSize: '12px', opacity: 0.7, marginTop: '15px'}}>
-                                tap or swipe to flip
-                            </div>
+                            <div className="card-label">{displayedLabel}</div>
+                            <div className="card-content">{displayedContent}</div>
                         </div>
 
                         <div className="action-buttons">
