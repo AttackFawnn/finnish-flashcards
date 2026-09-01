@@ -654,7 +654,7 @@
             const selectAction = (action) => {
                 setSelectedAction(action);
                 clearTimeout(selectedTimeoutRef.current);
-                selectedTimeoutRef.current = setTimeout(() => setSelectedAction(null), 1000);
+                selectedTimeoutRef.current = setTimeout(() => setSelectedAction(null), 500);
             };
 
             const startLeaving = (anim) => {
@@ -874,10 +874,10 @@
 
                         <div className="action-buttons">
                             <button className={`action-btn ${selectedAction === 'remove' ? 'selected' : ''}`} onClick={handleRemove}>
-                                ✓ Remove
+                                ✓ Got it!
                             </button>
                             <button className={`action-btn danger ${selectedAction === 'keep' ? 'selected' : ''}`} onClick={handleKeep}>
-                                ✗ Keep
+                                ✗ Try again
                             </button>
                         </div>
                     </div>
@@ -891,7 +891,7 @@
                 return (
                     <div className="container screen">
                         <div className="finish-screen">
-                            <h2>🎉 Onnittelut!</h2>
+                            <h2>🎉 Onnittelut! 🎉</h2>
                             <div className="stats">
                                 <div className="stats-item">
                                     <span className="stats-label">Total cards:</span> {totalCount}
