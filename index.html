@@ -221,8 +221,12 @@
             flex-direction: column;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
             user-select: none;
+        }
+
+        .card.flipped {
+            background: linear-gradient(135deg, #4a5aa8 0%, #523370 100%);
         }
 
         .card:active {
@@ -660,19 +664,10 @@
                 const distanceY = startY - endY;
                 const isLeftSwipe = distanceX > minSwipeDistance;
                 const isRightSwipe = distanceX < -minSwipeDistance;
-                const isUpSwipe = distanceY > minSwipeDistance;
-                const isDownSwipe = distanceY < -minSwipeDistance;
 
                 if (Math.abs(distanceX) > Math.abs(distanceY)) {
-                    // Horizontal swipe (left/right motion)
-                    if (isRightSwipe) {
-                        handleKeep(); // Swipe left to right = keep
-                    } else if (isLeftSwipe) {
-                        handleRemove(); // Swipe right to left = remove
-                    }
-                } else {
-                    // Vertical swipe (up/down motion)
-                    if (isUpSwipe || isDownSwipe) {
+                    // Horizontal swipe (left/right motion) - flip card
+                    if (isRightSwipe || isLeftSwipe) {
                         setIsFlipped(!isFlipped);
                     }
                 }
@@ -682,7 +677,7 @@
                 return (
                     <div className="container screen">
                         <div className="header">
-                            <h1>🇫🇮 Finnish Flashcards 🇫🇮</h1>
+                            <h1>🇫🇮 Flashcards 🇫🇮</h1>
                         </div>
 
                         <div className="setup-section">
@@ -757,14 +752,14 @@
                         </div>
 
                         <div 
-                            className="card" 
+                            className={`card ${isFlipped ? 'flipped' : ''}`} 
                             onClick={() => setIsFlipped(!isFlipped)}
                             style={{cursor: 'pointer'}}
                         >
                             <div className="card-label">{isFlipped ? backLabel : frontLabel}</div>
                             <div className="card-content">{isFlipped ? back : front}</div>
                             <div style={{fontSize: '12px', opacity: 0.7, marginTop: '15px'}}>
-                                tap to flip
+                                tap or swipe to flip
                             </div>
                         </div>
 
@@ -775,10 +770,6 @@
                             <button className="action-btn" onClick={handleKeep}>
                                 ✓ Keep
                             </button>
-                        </div>
-                        
-                        <div style={{textAlign: 'center', marginTop: '15px', fontSize: '12px', color: '#999'}}>
-                            swipe ← → to remove/keep
                         </div>
                     </div>
                 );
