@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finnish Flashcards</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        #root {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .screen {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Setup Screen */
+        .setup-section {
+            margin-bottom: 25px;
+        }
+
+        .setup-section h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .category-btn {
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .category-btn-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .category-btn-count {
+            font-size: 11px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .category-btn.active .category-btn-count {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .option-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .option-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+        }
+
+        .option-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Card Screen */
+        .card-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+
+        .progress-info {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .nav-buttons {
+            position: absolute;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+            pointer-events: auto;
+            padding: 5px 10px;
+        }
+
+        .nav-btn:hover {
+            color: #667eea;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 30px 0;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card-content {
+            font-size: 32px;
+            font-weight: bold;
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 480px) {
+            .card-content {
+                font-size: 24px;
+            }
+            .card {
+                min-height: 200px;
+                padding: 30px 15px;
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.remove {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .action-btn.remove:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .finish-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .finish-screen h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+
+        .stats-item {
+            margin: 10px 0;
+            color: #555;
+        }
+
+        .stats-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .restart-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const VOCAB_DATA = [
+            {"finnish": "punainen", "english": "red", "category": "Colors"},
+            {"finnish": "sininen", "english": "blue", "category": "Colors"},
+            {"finnish": "keltainen", "english": "yellow", "category": "Colors"},
+            {"finnish": "oranssi", "english": "orange", "category": "Colors"},
+            {"finnish": "vihreä", "english": "green", "category": "Colors"},
+            {"finnish": "musta", "english": "black", "category": "Colors"},
+            {"finnish": "harmaa", "english": "gray", "category": "Colors"},
+            {"finnish": "valkoinen", "english": "white", "category": "Colors"},
+            {"finnish": "ruskea", "english": "brown", "category": "Colors"},
+            {"finnish": "violetti", "english": "purple", "category": "Colors"},
+            {"finnish": "Maanantai", "english": "Monday", "category": "Days of the Week"},
+            {"finnish": "Tiistai", "english": "Tuesday", "category": "Days of the Week"},
+            {"finnish": "Keskiviikko", "english": "Wednesday", "category": "Days of the Week"},
+            {"finnish": "Torstai", "english": "Thursday", "category": "Days of the Week"},
+            {"finnish": "Perjantai", "english": "Friday", "category": "Days of the Week"},
+            {"finnish": "Lauantai", "english": "Saturday", "category": "Days of the Week"},
+            {"finnish": "Sunnuntai", "english": "Sunday", "category": "Days of the Week"},
+            {"finnish": "Viikonloppu", "english": "Weekend", "category": "Days of the Week"},
+            {"finnish": "Nähdään!", "english": "See you!", "category": "Expressions"},
+            {"finnish": "Nähdään huomenna!", "english": "See you tomorrow!", "category": "Expressions"},
+            {"finnish": "Heippa!", "english": "Bye!", "category": "Expressions"},
+            {"finnish": "Hauska tutustua!", "english": "Nice to meet you!", "category": "Expressions"},
+            {"finnish": "Tässä on Iina.", "english": "This is Iina.", "category": "Expressions"},
+            {"finnish": "Kiitos samoin!", "english": "Thanks, same to you!", "category": "Expressions"},
+            {"finnish": "Näkemiini!", "english": "See you!", "category": "Expressions"},
+            {"finnish": "Kylla", "english": "Yes", "category": "Expressions"},
+            {"finnish": "Ole hyvä", "english": "Here you go/Please", "category": "Expressions"},
+            {"finnish": "Ei kestä!", "english": "No problem!", "category": "Expressions"},
+            {"finnish": "Ei se mitään!", "english": "No problem!", "category": "Expressions"},
+            {"finnish": "Kippis! / Skool!", "english": "Cheers!", "category": "Expressions"},
+            {"finnish": "Hyvää ruokahalua!", "english": "Bon appétit!", "category": "Expressions"},
+            {"finnish": "Kiitos ruoasta!", "english": "Thanks for the meal!", "category": "Expressions"},
+            {"finnish": "Kiitos, oli hyvää.", "english": "Thanks, it was good.", "category": "Expressions"},
+            {"finnish": "Hyvää huomenta!", "english": "Good morning!", "category": "Expressions"},
+            {"finnish": "Huomenta!", "english": "Good morning!", "category": "Expressions"},
+            {"finnish": "Päivää!", "english": "Good day!", "category": "Expressions"},
+            {"finnish": "Hyvää päivää!", "english": "Good day!", "category": "Expressions"},
+            {"finnish": "Hyvää iltaa!", "english": "Good evening!", "category": "Expressions"},
+            {"finnish": "Iltaa!", "english": "Evening!", "category": "Expressions"},
+            {"finnish": "Hyvää yötä!", "english": "Good night!", "category": "Expressions"},
+            {"finnish": "Nuku hyvin!", "english": "Sleep well!", "category": "Expressions"},
+            {"finnish": "Mitä kuuluu?", "english": "How are you?", "category": "Expressions"},
+            {"finnish": "Minulle kuuluu hyvää.", "english": "I'm doing well.", "category": "Expressions"},
+            {"finnish": "Entä sinulle?", "english": "And you?", "category": "Expressions"},
+            {"finnish": "Ihan hyvää, kiitos.", "english": "Pretty good, thanks.", "category": "Expressions"},
+            {"finnish": "Miten se kirjoitetaan?", "english": "How is it spelled?", "category": "Expressions"},
+            {"finnish": "Tammikuu", "english": "January", "category": "Months"},
+            {"finnish": "Helmikuu", "english": "February", "category": "Months"},
+            {"finnish": "Maaliskuu", "english": "March", "category": "Months"},
+            {"finnish": "Huhtikuu", "english": "April", "category": "Months"},
+            {"finnish": "Toukokuu", "english": "May", "category": "Months"},
+            {"finnish": "Kesäkuu", "english": "June", "category": "Months"},
+            {"finnish": "Heinäkuu", "english": "July", "category": "Months"},
+            {"finnish": "Elokuu", "english": "August", "category": "Months"},
+            {"finnish": "Syyskuu", "english": "September", "category": "Months"},
+            {"finnish": "Lokakuu", "english": "October", "category": "Months"},
+            {"finnish": "Marraskuu", "english": "November", "category": "Months"},
+            {"finnish": "Joulukuu", "english": "December", "category": "Months"},
+            {"finnish": "toissapäivänä", "english": "the day before yesterday", "category": "Days of the Week"},
+            {"finnish": "eilen", "english": "yesterday", "category": "Days of the Week"},
+            {"finnish": "tänään", "english": "today", "category": "Days of the Week"},
+            {"finnish": "huomenna", "english": "tomorrow", "category": "Days of the Week"},
+            {"finnish": "ylihuomenna", "english": "the day after tomorrow", "category": "Days of the Week"},
+            {"finnish": "auto", "english": "car", "category": "Nouns"},
+            {"finnish": "bussi", "english": "bus", "category": "Nouns"},
+            {"finnish": "bussipysäkki", "english": "bus stop", "category": "Nouns"},
+            {"finnish": "metro", "english": "subway", "category": "Nouns"},
+            {"finnish": "koti", "english": "home", "category": "Nouns"},
+            {"finnish": "puisto", "english": "park", "category": "Nouns"},
+            {"finnish": "Brasilia", "english": "Brazil", "category": "Nouns"},
+            {"finnish": "kieli", "english": "language", "category": "Nouns"},
+            {"finnish": "äidinkieli", "english": "native language", "category": "Nouns"},
+            {"finnish": "opiskelija", "english": "student", "category": "Nouns"},
+            {"finnish": "opettaja", "english": "teacher", "category": "Nouns"},
+            {"finnish": "luokka", "english": "classroom", "category": "Nouns"},
+            {"finnish": "tietokone", "english": "computer", "category": "Nouns"},
+            {"finnish": "puhelin", "english": "phone", "category": "Nouns"},
+            {"finnish": "paperi", "english": "paper", "category": "Nouns"},
+            {"finnish": "kynä", "english": "pen", "category": "Nouns"},
+            {"finnish": "kirja", "english": "book", "category": "Nouns"},
+            {"finnish": "taulu", "english": "chalkboard", "category": "Nouns"},
+            {"finnish": "tuoli", "english": "chair", "category": "Nouns"},
+            {"finnish": "pöytä", "english": "table", "category": "Nouns"},
+            {"finnish": "kotitehtävä", "english": "homework", "category": "Nouns"},
+            {"finnish": "näppäimistö", "english": "keyboard", "category": "Nouns"},
+            {"finnish": "hiiri", "english": "mouse", "category": "Nouns"},
+            {"finnish": "näyttö", "english": "screen", "category": "Nouns"},
+            {"finnish": "ikkuna", "english": "window", "category": "Nouns"},
+            {"finnish": "ovi", "english": "door", "category": "Nouns"},
+            {"finnish": "kello", "english": "clock", "category": "Nouns"},
+            {"finnish": "selain", "english": "browser", "category": "Nouns"},
+            {"finnish": "vessa", "english": "bathroom", "category": "Nouns"},
+            {"finnish": "kuulokkeet", "english": "headphones", "category": "Nouns"},
+            {"finnish": "kioski", "english": "kiosk", "category": "Nouns"},
+            {"finnish": "jäätelö", "english": "ice cream", "category": "Nouns"},
+            {"finnish": "euro", "english": "euro", "category": "Nouns"},
+            {"finnish": "raha", "english": "money", "category": "Nouns"},
+            {"finnish": "totta", "english": "true", "category": "Nouns"},
+            {"finnish": "kurssi", "english": "course", "category": "Nouns"},
+            {"finnish": "paikka", "english": "place", "category": "Nouns"},
+            {"finnish": "vapaa", "english": "free/vacant", "category": "Nouns"},
+            {"finnish": "kiva", "english": "nice/cool", "category": "Nouns"},
+            {"finnish": "nimi", "english": "name", "category": "Nouns"},
+            {"finnish": "etunimi", "english": "first name", "category": "Nouns"},
+            {"finnish": "sukunimi", "english": "last name", "category": "Nouns"},
+            {"finnish": "kurssipäivä", "english": "course day", "category": "Nouns"},
+            {"finnish": "nolla", "english": "0", "category": "Numbers"},
+            {"finnish": "yksi", "english": "1", "category": "Numbers"},
+            {"finnish": "kaksi", "english": "2", "category": "Numbers"},
+            {"finnish": "kolme", "english": "3", "category": "Numbers"},
+            {"finnish": "neljä", "english": "4", "category": "Numbers"},
+            {"finnish": "viisi", "english": "5", "category": "Numbers"},
+            {"finnish": "kuusi", "english": "6", "category": "Numbers"},
+            {"finnish": "seitsemän", "english": "7", "category": "Numbers"},
+            {"finnish": "kahdeksan", "english": "8", "category": "Numbers"},
+            {"finnish": "yhdeksän", "english": "9", "category": "Numbers"},
+            {"finnish": "kymmenen", "english": "10", "category": "Numbers"},
+            {"finnish": "yksitoista", "english": "11", "category": "Numbers"},
+            {"finnish": "kaksitoista", "english": "12", "category": "Numbers"},
+            {"finnish": "kolmetoista", "english": "13", "category": "Numbers"},
+            {"finnish": "neljätoista", "english": "14", "category": "Numbers"},
+            {"finnish": "viisitoista", "english": "15", "category": "Numbers"},
+            {"finnish": "kuusitoista", "english": "16", "category": "Numbers"},
+            {"finnish": "seitsemäntoista", "english": "17", "category": "Numbers"},
+            {"finnish": "kahdeksantoista", "english": "18", "category": "Numbers"},
+            {"finnish": "yhdeksäntoista", "english": "19", "category": "Numbers"},
+            {"finnish": "kaksikymmentä", "english": "20", "category": "Numbers"},
+            {"finnish": "sata", "english": "100", "category": "Numbers"},
+            {"finnish": "satayksi", "english": "101", "category": "Numbers"},
+            {"finnish": "kaksisataa", "english": "200", "category": "Numbers"},
+            {"finnish": "kolmesataa", "english": "300", "category": "Numbers"},
+            {"finnish": "Minä olen", "english": "I am", "category": "Personal Pronouns"},
+            {"finnish": "Sinä olet", "english": "You are (singular)", "category": "Personal Pronouns"},
+            {"finnish": "Hän on", "english": "He/She is", "category": "Personal Pronouns"},
+            {"finnish": "Me olemme", "english": "We are", "category": "Personal Pronouns"},
+            {"finnish": "Te olette", "english": "You are (plural/formal)", "category": "Personal Pronouns"},
+            {"finnish": "He ovat", "english": "They are", "category": "Personal Pronouns"},
+            {"finnish": "sinä", "english": "you (singular)", "category": "Personal Pronouns"},
+            {"finnish": "te", "english": "you (plural/formal)", "category": "Personal Pronouns"},
+            {"finnish": "minun", "english": "my/mine", "category": "Personal Pronouns"},
+            {"finnish": "ja", "english": "and", "category": "Small Words"},
+            {"finnish": "muu", "english": "other", "category": "Small Words"},
+            {"finnish": "koska", "english": "because", "category": "Small Words"},
+            {"finnish": "sitten", "english": "then", "category": "Small Words"},
+            {"finnish": "myös", "english": "also", "category": "Small Words"},
+            {"finnish": "nyt", "english": "now", "category": "Small Words"},
+            {"finnish": "ensin", "english": "first", "category": "Small Words"},
+            {"finnish": "vähän", "english": "little", "category": "Small Words"},
+            {"finnish": "ei ... vaan", "english": "not...but", "category": "Small Words"},
+            {"finnish": "mutta", "english": "but", "category": "Small Words"},
+            {"finnish": "missä", "english": "where", "category": "Questions"},
+            {"finnish": "mistä", "english": "from (where)", "category": "Questions"},
+            {"finnish": "kotoisin", "english": "from", "category": "Questions"},
+            {"finnish": "Kuka?", "english": "Who?", "category": "Questions"},
+            {"finnish": "Mitä?", "english": "What?", "category": "Questions"},
+            {"finnish": "Milloin?", "english": "When?", "category": "Questions"},
+            {"finnish": "Miksi?", "english": "Why?", "category": "Questions"},
+            {"finnish": "Miten?", "english": "How?", "category": "Questions"},
+            {"finnish": "Mikä?", "english": "Which?", "category": "Questions"},
+            {"finnish": "minkämaalainen", "english": "from which country", "category": "Questions"},
+            {"finnish": "Ai jaa!", "english": "I see!", "category": "Expressions"},
+            {"finnish": "Ai niin!", "english": "Oh yes!", "category": "Expressions"},
+            {"finnish": "tämä", "english": "this", "category": "Small Words"},
+            {"finnish": "ihan", "english": "quite", "category": "Small Words"},
+            {"finnish": "asua", "english": "to live", "category": "Verbs"},
+            {"finnish": "tulla", "english": "to come", "category": "Verbs"},
+            {"finnish": "ajaa", "english": "to drive", "category": "Verbs"},
+            {"finnish": "kirjoittaa", "english": "to write", "category": "Verbs"},
+            {"finnish": "lukea", "english": "to read", "category": "Verbs"},
+            {"finnish": "puhua", "english": "to speak", "category": "Verbs"},
+            {"finnish": "nauraa", "english": "to laugh", "category": "Verbs"},
+            {"finnish": "ostaa", "english": "to buy", "category": "Verbs"},
+            {"finnish": "maksaa", "english": "to cost", "category": "Verbs"},
+            {"finnish": "säästää", "english": "to save", "category": "Verbs"},
+            {"finnish": "loppua", "english": "to end", "category": "Verbs"},
+            {"finnish": "mennä", "english": "to go", "category": "Verbs"},
+            {"finnish": "istua", "english": "to sit", "category": "Verbs"},
+            {"finnish": "en puhu", "english": "I don't speak", "category": "Verbs"},
+            {"finnish": "onko", "english": "is (question form)", "category": "Verbs"},
+            {"finnish": "olla", "english": "to be", "category": "Verbs"},
+        ];
+
+        function FlashcardApp() {
+            const [screen, setScreen] = useState('setup'); // 'setup', 'card', 'finish'
+            const [selectedCategories, setSelectedCategories] = useState([]);
+            const [startLanguage, setStartLanguage] = useState('finnish'); // 'finnish', 'english', 'random'
+            const [deck, setDeck] = useState([]);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
+            const [kept, setKept] = useState(0);
+            const [removed, setRemoved] = useState(0);
+            const [touchStart, setTouchStart] = useState(null);
+            const [touchEnd, setTouchEnd] = useState(null);
+
+            const categories = [...new Set(VOCAB_DATA.map(item => item.category))].sort();
+            
+            // Count words in each category
+            const getCategoryCount = (category) => {
+                return VOCAB_DATA.filter(item => item.category === category).length;
+            };
+
+            const toggleCategory = (category) => {
+                setSelectedCategories(prev =>
+                    prev.includes(category)
+                        ? prev.filter(c => c !== category)
+                        : [...prev, category]
+                );
+            };
+
+            const startDrill = () => {
+                if (selectedCategories.length === 0) {
+                    alert('Please select at least one category');
+                    return;
+                }
+
+                const filtered = VOCAB_DATA.filter(item =>
+                    selectedCategories.includes(item.category)
+                );
+
+                // Shuffle the deck
+                const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+                setDeck(shuffled);
+                setCurrentIndex(0);
+                setIsFlipped(false);
+                setKept(0);
+                setRemoved(0);
+                setScreen('card');
+            };
+
+            const handleKeep = () => {
+                setKept(kept + 1);
+                nextCard();
+            };
+
+            const handleRemove = () => {
+                setRemoved(removed + 1);
+                nextCard();
+            };
+
+            const nextCard = () => {
+                if (currentIndex + 1 >= deck.length) {
+                    setScreen('finish');
+                } else {
+                    setCurrentIndex(currentIndex + 1);
+                    setIsFlipped(false);
+                }
+            };
+
+            const skipCard = () => {
+                nextCard();
+            };
+
+            const restartDrill = () => {
+                setScreen('setup');
+                setSelectedCategories([]);
+                setStartLanguage('finnish');
+            };
+
+            const getCurrentCard = () => {
+                if (deck.length === 0) return null;
+                return deck[currentIndex];
+            };
+
+            const getCardDisplay = () => {
+                const card = getCurrentCard();
+                if (!card) return { front: '', frontLabel: '', back: '', backLabel: '' };
+
+                let front, frontLabel, back, backLabel;
+
+                if (startLanguage === 'random') {
+                    const isFinFirstTime = Math.random() > 0.5;
+                    if (isFinFirstTime) {
+                        front = card.finnish;
+                        frontLabel = 'FINNISH';
+                        back = card.english;
+                        backLabel = 'ENGLISH';
+                    } else {
+                        front = card.english;
+                        frontLabel = 'ENGLISH';
+                        back = card.finnish;
+                        backLabel = 'FINNISH';
+                    }
+                } else if (startLanguage === 'finnish') {
+                    front = card.finnish;
+                    frontLabel = 'FINNISH';
+                    back = card.english;
+                    backLabel = 'ENGLISH';
+                } else {
+                    front = card.english;
+                    frontLabel = 'ENGLISH';
+                    back = card.finnish;
+                    backLabel = 'FINNISH';
+                }
+
+                return { front, frontLabel, back, backLabel };
+            };
+
+            // Swipe detection
+            const minSwipeDistance = 50;
+
+            const onTouchStart = (e) => {
+                setTouchEnd(null);
+                setTouchStart(e.targetTouches[0].clientX + ',' + e.targetTouches[0].clientY);
+            };
+
+            const onTouchMove = (e) => {
+                setTouchEnd(e.targetTouches[0].clientX + ',' + e.targetTouches[0].clientY);
+            };
+
+            const onTouchEnd = () => {
+                if (!touchStart || !touchEnd) return;
+
+                const [startX, startY] = touchStart.split(',').map(Number);
+                const [endX, endY] = touchEnd.split(',').map(Number);
+
+                const distanceX = startX - endX;
+                const distanceY = startY - endY;
+                const isLeftSwipe = distanceX > minSwipeDistance;
+                const isRightSwipe = distanceX < -minSwipeDistance;
+                const isUpSwipe = distanceY > minSwipeDistance;
+                const isDownSwipe = distanceY < -minSwipeDistance;
+
+                if (Math.abs(distanceX) > Math.abs(distanceY)) {
+                    // Horizontal swipe (left/right motion)
+                    if (isRightSwipe) {
+                        handleKeep(); // Swipe left to right = keep
+                    } else if (isLeftSwipe) {
+                        handleRemove(); // Swipe right to left = remove
+                    }
+                } else {
+                    // Vertical swipe (up/down motion)
+                    if (isUpSwipe || isDownSwipe) {
+                        setIsFlipped(!isFlipped);
+                    }
+                }
+            };
+
+            if (screen === 'setup') {
+                return (
+                    <div className="container screen">
+                        <div className="header">
+                            <h1>🇫🇮 Finnish Flashcards 🇫🇮</h1>
+                        </div>
+
+                        <div className="setup-section">
+                            <h2>📚 Select Categories</h2>
+                            <div className="category-grid">
+                                {categories.map(category => (
+                                    <button
+                                        key={category}
+                                        className={`category-btn ${selectedCategories.includes(category) ? 'active' : ''}`}
+                                        onClick={() => toggleCategory(category)}
+                                        title={`${getCategoryCount(category)} words`}
+                                    >
+                                        <div className="category-btn-name">{category}</div>
+                                        <div className="category-btn-count">{getCategoryCount(category)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="setup-section">
+                            <h2>🎯 Start With</h2>
+                            <div className="option-group">
+                                <button
+                                    className={`option-btn ${startLanguage === 'finnish' ? 'active' : ''}`}
+                                    onClick={() => setStartLanguage('finnish')}
+                                >
+                                    🇫🇮 Finnish
+                                </button>
+                                <button
+                                    className={`option-btn ${startLanguage === 'english' ? 'active' : ''}`}
+                                    onClick={() => setStartLanguage('english')}
+                                >
+                                    🇬🇧 English
+                                </button>
+                                <button
+                                    className={`option-btn ${startLanguage === 'random' ? 'active' : ''}`}
+                                    onClick={() => setStartLanguage('random')}
+                                >
+                                    🎲 Random
+                                </button>
+                            </div>
+                        </div>
+
+                        <button className="start-btn" onClick={startDrill}>
+                            Start Drilling →
+                        </button>
+                    </div>
+                );
+            }
+
+            if (screen === 'card') {
+                const card = getCurrentCard();
+                if (!card) return null;
+
+                const { front, frontLabel, back, backLabel } = getCardDisplay();
+
+                return (
+                    <div 
+                        className="container screen"
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
+                    >
+                        <div className="card-header">
+                            <div className="nav-buttons">
+                                <button className="nav-btn" onClick={() => setScreen('setup')}>home</button>
+                                <button className="nav-btn" onClick={skipCard}>skip</button>
+                            </div>
+                            <div className="progress-info">
+                                Card {currentIndex + 1} of {deck.length}
+                            </div>
+                        </div>
+
+                        <div 
+                            className="card" 
+                            onClick={() => setIsFlipped(!isFlipped)}
+                            style={{cursor: 'pointer'}}
+                        >
+                            <div className="card-label">{isFlipped ? backLabel : frontLabel}</div>
+                            <div className="card-content">{isFlipped ? back : front}</div>
+                            <div style={{fontSize: '12px', opacity: 0.7, marginTop: '15px'}}>
+                                tap to flip
+                            </div>
+                        </div>
+
+                        <div className="action-buttons">
+                            <button className="action-btn remove" onClick={handleRemove}>
+                                ✗ Remove
+                            </button>
+                            <button className="action-btn" onClick={handleKeep}>
+                                ✓ Keep
+                            </button>
+                        </div>
+                        
+                        <div style={{textAlign: 'center', marginTop: '15px', fontSize: '12px', color: '#999'}}>
+                            swipe ← → to remove/keep
+                        </div>
+                    </div>
+                );
+            }
+
+            if (screen === 'finish') {
+                const total = kept + removed;
+                const percentage = total > 0 ? Math.round((kept / total) * 100) : 0;
+
+                return (
+                    <div className="container screen">
+                        <div className="finish-screen">
+                            <h2>✨ Drill Complete!</h2>
+                            <div className="stats">
+                                <div className="stats-item">
+                                    <span className="stats-label">Cards Reviewed:</span> {total}
+                                </div>
+                                <div className="stats-item">
+                                    <span className="stats-label">✓ Kept:</span> {kept}
+                                </div>
+                                <div className="stats-item">
+                                    <span className="stats-label">✗ Removed:</span> {removed}
+                                </div>
+                                <div className="stats-item">
+                                    <span className="stats-label">Accuracy:</span> {percentage}%
+                                </div>
+                            </div>
+                            <button className="restart-btn" onClick={restartDrill}>
+                                ← Back to Setup
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(<FlashcardApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
