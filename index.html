@@ -252,8 +252,8 @@
             opacity: 0;
         }
 
-        .card.slide-right {
-            transform: translateX(130%) rotate(8deg);
+        .card.sink-back {
+            transform: scale(0.85) translateY(35px);
             opacity: 0;
         }
 
@@ -332,19 +332,25 @@
             transition: all 0.3s;
         }
 
-        .action-btn:hover,
+        .action-btn:hover {
+            border-color: #4c5fd4;
+        }
+
         .action-btn.selected {
             background: #667eea;
             color: white;
         }
 
-        .action-btn.remove {
+        .action-btn.danger {
             border-color: #e74c3c;
             color: #e74c3c;
         }
 
-        .action-btn.remove:hover,
-        .action-btn.remove.selected {
+        .action-btn.danger:hover {
+            border-color: #c0392b;
+        }
+
+        .action-btn.danger.selected {
             background: #e74c3c;
             color: white;
         }
@@ -651,17 +657,17 @@
                 selectedTimeoutRef.current = setTimeout(() => setSelectedAction(null), 1000);
             };
 
-            const startLeaving = (dir) => {
+            const startLeaving = (anim) => {
                 const { frontLabel, front, backLabel, back } = getCardDisplay();
                 const label = isFlipped ? backLabel : frontLabel;
                 const content = isFlipped ? back : front;
-                setLeavingCard({ label, content, isEnglish: label === 'ENGLISH', dir, phase: 'in' });
+                setLeavingCard({ label, content, isEnglish: label === 'ENGLISH', anim, phase: 'in' });
             };
 
             const handleKeep = () => {
                 if (leavingCard) return;
                 selectAction('keep');
-                startLeaving('right');
+                startLeaving('sink');
                 setKept(prev => prev + 1);
                 setDeck(prev => {
                     const [first, ...rest] = prev;
@@ -808,7 +814,7 @@
                                     className={`option-btn ${startLanguage === 'random' ? 'active' : ''}`}
                                     onClick={() => setStartLanguage('random')}
                                 >
-                                    🎲 Random
+                                    🎲 Mixed
                                 </button>
                             </div>
                         </div>
@@ -858,7 +864,7 @@
                             </div>
                             {leavingCard && (
                                 <div
-                                    className={`card card-leaving ${leavingCard.isEnglish ? 'english' : ''} ${leavingCard.phase === 'out' ? (leavingCard.dir === 'left' ? 'slide-left' : 'slide-right') : ''}`}
+                                    className={`card card-leaving ${leavingCard.isEnglish ? 'english' : ''} ${leavingCard.phase === 'out' ? (leavingCard.anim === 'left' ? 'slide-left' : 'sink-back') : ''}`}
                                 >
                                     <div className="card-label">{leavingCard.label}</div>
                                     <div className="card-content">{leavingCard.content}</div>
@@ -867,11 +873,11 @@
                         </div>
 
                         <div className="action-buttons">
-                            <button className={`action-btn remove ${selectedAction === 'remove' ? 'selected' : ''}`} onClick={handleRemove}>
-                                ✗ Remove
+                            <button className={`action-btn ${selectedAction === 'remove' ? 'selected' : ''}`} onClick={handleRemove}>
+                                ✓ Remove
                             </button>
-                            <button className={`action-btn ${selectedAction === 'keep' ? 'selected' : ''}`} onClick={handleKeep}>
-                                ✓ Keep
+                            <button className={`action-btn danger ${selectedAction === 'keep' ? 'selected' : ''}`} onClick={handleKeep}>
+                                ✗ Keep
                             </button>
                         </div>
                     </div>
@@ -879,22 +885,22 @@
             }
 
             if (screen === 'finish') {
-                const total = kept + removed;
-                const percentage = total > 0 ? Math.round((kept / total) * 100) : 0;
+                const totalAttempts = kept + removed;
+                const percentage = totalAttempts > 0 ? Math.round((removed / totalAttempts) * 100) : 0;
 
                 return (
                     <div className="container screen">
                         <div className="finish-screen">
-                            <h2>✨ Drill Complete!</h2>
+                            <h2>🎉 Onnittelut!</h2>
                             <div className="stats">
                                 <div className="stats-item">
-                                    <span className="stats-label">Cards Reviewed:</span> {total}
+                                    <span className="stats-label">Total cards:</span> {totalCount}
                                 </div>
                                 <div className="stats-item">
-                                    <span className="stats-label">✓ Kept:</span> {kept}
+                                    <span className="stats-label">✓ Correct:</span> {removed}
                                 </div>
                                 <div className="stats-item">
-                                    <span className="stats-label">✗ Removed:</span> {removed}
+                                    <span className="stats-label">✗ Rereviewed:</span> {kept}
                                 </div>
                                 <div className="stats-item">
                                     <span className="stats-label">Accuracy:</span> {percentage}%
