@@ -216,18 +216,27 @@
             color: #667eea;
         }
 
-        .card {
+        .card-stack {
             position: relative;
+            margin: 30px 0;
+            min-height: 250px;
+        }
+
+        .card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 15px;
             padding: 40px 20px;
-            margin: 30px 0;
-            min-height: 250px;
             display: flex;
             cursor: pointer;
-            transition: all 0.3s;
             user-select: none;
+            z-index: 2;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
         .card.english {
@@ -236,6 +245,38 @@
 
         .card:active {
             transform: scale(0.98);
+        }
+
+        .card.slide-left {
+            transform: translateX(-130%) rotate(-8deg);
+            opacity: 0;
+        }
+
+        .card.slide-right {
+            transform: translateX(130%) rotate(8deg);
+            opacity: 0;
+        }
+
+        .card-ghost {
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .card-ghost-1 {
+            z-index: 1;
+            transform: scale(0.96) translateY(10px);
+            opacity: 0.6;
+        }
+
+        .card-ghost-2 {
+            z-index: 0;
+            transform: scale(0.92) translateY(20px);
+            opacity: 0.35;
+        }
+
+        .card-leaving {
+            z-index: 3;
+            pointer-events: none;
         }
 
         .card-label {
@@ -264,8 +305,10 @@
             .card-content {
                 font-size: 24px;
             }
-            .card {
+            .card-stack {
                 min-height: 200px;
+            }
+            .card {
                 padding: 30px 15px;
             }
         }
@@ -289,7 +332,8 @@
             transition: all 0.3s;
         }
 
-        .action-btn:hover {
+        .action-btn:hover,
+        .action-btn.selected {
             background: #667eea;
             color: white;
         }
@@ -299,7 +343,8 @@
             color: #e74c3c;
         }
 
-        .action-btn.remove:hover {
+        .action-btn.remove:hover,
+        .action-btn.remove.selected {
             background: #e74c3c;
             color: white;
         }
@@ -355,7 +400,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         const VOCAB_DATA = [
             {"finnish": "punainen", "english": "red", "category": "Colors"},
@@ -545,12 +590,15 @@
             const [selectedCategories, setSelectedCategories] = useState([]);
             const [startLanguage, setStartLanguage] = useState('finnish'); // 'finnish', 'english', 'random'
             const [deck, setDeck] = useState([]);
-            const [currentIndex, setCurrentIndex] = useState(0);
+            const [totalCount, setTotalCount] = useState(0);
             const [isFlipped, setIsFlipped] = useState(false);
             const [kept, setKept] = useState(0);
             const [removed, setRemoved] = useState(0);
             const [touchStart, setTouchStart] = useState(null);
             const [touchEnd, setTouchEnd] = useState(null);
+            const [leavingCard, setLeavingCard] = useState(null); // { label, content, isEnglish, dir, phase }
+            const [selectedAction, setSelectedAction] = useState(null); // null, 'remove', 'keep'
+            const selectedTimeoutRef = useRef(null);
 
             const categories = [...new Set(VOCAB_DATA.map(item => item.category))].sort();
             
@@ -577,37 +625,67 @@
                     selectedCategories.includes(item.category)
                 );
 
-                // Shuffle the deck
-                const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+                // Shuffle the deck and lock in each card's display direction
+                // up front, so 'random' mode doesn't re-roll (and re-color) on every render
+                const shuffled = [...filtered]
+                    .sort(() => Math.random() - 0.5)
+                    .map(item => ({
+                        ...item,
+                        direction: startLanguage === 'random'
+                            ? (Math.random() > 0.5 ? 'finnish' : 'english')
+                            : startLanguage
+                    }));
                 setDeck(shuffled);
-                setCurrentIndex(0);
+                setTotalCount(shuffled.length);
                 setIsFlipped(false);
                 setKept(0);
                 setRemoved(0);
+                setLeavingCard(null);
+                setSelectedAction(null);
                 setScreen('card');
             };
 
+            const selectAction = (action) => {
+                setSelectedAction(action);
+                clearTimeout(selectedTimeoutRef.current);
+                selectedTimeoutRef.current = setTimeout(() => setSelectedAction(null), 1000);
+            };
+
+            const startLeaving = (dir) => {
+                const { frontLabel, front, backLabel, back } = getCardDisplay();
+                const label = isFlipped ? backLabel : frontLabel;
+                const content = isFlipped ? back : front;
+                setLeavingCard({ label, content, isEnglish: label === 'ENGLISH', dir, phase: 'in' });
+            };
+
             const handleKeep = () => {
-                setKept(kept + 1);
-                nextCard();
+                if (leavingCard) return;
+                selectAction('keep');
+                startLeaving('right');
+                setKept(prev => prev + 1);
+                setDeck(prev => {
+                    const [first, ...rest] = prev;
+                    return [...rest, first];
+                });
+                setIsFlipped(false);
             };
 
             const handleRemove = () => {
-                setRemoved(removed + 1);
-                nextCard();
-            };
-
-            const nextCard = () => {
-                if (currentIndex + 1 >= deck.length) {
-                    setScreen('finish');
-                } else {
-                    setCurrentIndex(currentIndex + 1);
-                    setIsFlipped(false);
-                }
+                if (leavingCard) return;
+                selectAction('remove');
+                startLeaving('left');
+                setRemoved(prev => prev + 1);
+                setDeck(prev => prev.slice(1));
+                setIsFlipped(false);
             };
 
             const skipCard = () => {
-                nextCard();
+                if (leavingCard) return;
+                setDeck(prev => {
+                    const [first, ...rest] = prev;
+                    return [...rest, first];
+                });
+                setIsFlipped(false);
             };
 
             const restartDrill = () => {
@@ -616,9 +694,27 @@
                 setStartLanguage('finnish');
             };
 
+            useEffect(() => {
+                if (screen === 'card' && deck.length === 0 && totalCount > 0) {
+                    setScreen('finish');
+                }
+            }, [screen, deck, totalCount]);
+
+            useEffect(() => {
+                if (!leavingCard) return;
+                if (leavingCard.phase === 'in') {
+                    const frame = requestAnimationFrame(() => {
+                        setLeavingCard(prev => prev && { ...prev, phase: 'out' });
+                    });
+                    return () => cancelAnimationFrame(frame);
+                }
+                const timeout = setTimeout(() => setLeavingCard(null), 300);
+                return () => clearTimeout(timeout);
+            }, [leavingCard]);
+
             const getCurrentCard = () => {
                 if (deck.length === 0) return null;
-                return deck[currentIndex];
+                return deck[0];
             };
 
             const getCardDisplay = () => {
@@ -627,20 +723,7 @@
 
                 let front, frontLabel, back, backLabel;
 
-                if (startLanguage === 'random') {
-                    const isFinFirstTime = Math.random() > 0.5;
-                    if (isFinFirstTime) {
-                        front = card.finnish;
-                        frontLabel = 'FINNISH';
-                        back = card.english;
-                        backLabel = 'ENGLISH';
-                    } else {
-                        front = card.english;
-                        frontLabel = 'ENGLISH';
-                        back = card.finnish;
-                        backLabel = 'FINNISH';
-                    }
-                } else if (startLanguage === 'finnish') {
+                if (card.direction === 'finnish') {
                     front = card.finnish;
                     frontLabel = 'FINNISH';
                     back = card.english;
@@ -759,24 +842,35 @@
                                 <button className="nav-btn" onClick={skipCard}>skip</button>
                             </div>
                             <div className="progress-info">
-                                Card {currentIndex + 1} of {deck.length}
+                                {deck.length} card{deck.length === 1 ? '' : 's'} left
                             </div>
                         </div>
 
-                        <div
-                            className={`card ${isEnglish ? 'english' : ''}`}
-                            onClick={() => setIsFlipped(!isFlipped)}
-                            style={{cursor: 'pointer'}}
-                        >
-                            <div className="card-label">{displayedLabel}</div>
-                            <div className="card-content">{displayedContent}</div>
+                        <div className="card-stack">
+                            {deck.length > 2 && <div className="card card-ghost card-ghost-2"></div>}
+                            {deck.length > 1 && <div className="card card-ghost card-ghost-1"></div>}
+                            <div
+                                className={`card ${isEnglish ? 'english' : ''}`}
+                                onClick={() => setIsFlipped(!isFlipped)}
+                            >
+                                <div className="card-label">{displayedLabel}</div>
+                                <div className="card-content">{displayedContent}</div>
+                            </div>
+                            {leavingCard && (
+                                <div
+                                    className={`card card-leaving ${leavingCard.isEnglish ? 'english' : ''} ${leavingCard.phase === 'out' ? (leavingCard.dir === 'left' ? 'slide-left' : 'slide-right') : ''}`}
+                                >
+                                    <div className="card-label">{leavingCard.label}</div>
+                                    <div className="card-content">{leavingCard.content}</div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="action-buttons">
-                            <button className="action-btn remove" onClick={handleRemove}>
+                            <button className={`action-btn remove ${selectedAction === 'remove' ? 'selected' : ''}`} onClick={handleRemove}>
                                 ✗ Remove
                             </button>
-                            <button className="action-btn" onClick={handleKeep}>
+                            <button className={`action-btn ${selectedAction === 'keep' ? 'selected' : ''}`} onClick={handleKeep}>
                                 ✓ Keep
                             </button>
                         </div>
