@@ -153,8 +153,14 @@
             border-color: #667eea;
         }
 
+        .setup-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         .start-btn {
-            width: 100%;
+            flex: 3;
             padding: 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -163,7 +169,6 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 20px;
             transition: transform 0.2s;
         }
 
@@ -173,6 +178,104 @@
 
         .start-btn:active {
             transform: translateY(0);
+        }
+
+        .wordbank-btn {
+            flex: 2;
+            padding: 15px 10px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .wordbank-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Word Bank Screen */
+        .wordbank-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .wordbank-title {
+            font-size: 20px;
+            color: #333;
+            margin: 0;
+        }
+
+        .wordbank-category {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .wordbank-category-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            text-align: left;
+            transition: background 0.2s;
+        }
+
+        .wordbank-category-header:hover {
+            background: #f8f9fa;
+        }
+
+        .wordbank-chevron {
+            color: #667eea;
+            font-size: 12px;
+        }
+
+        .wordbank-words {
+            padding: 6px 15px 12px;
+            background: #f8f9fa;
+        }
+
+        .wordbank-word-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 14px;
+        }
+
+        .wordbank-word-row:last-child {
+            border-bottom: none;
+        }
+
+        .wordbank-fi {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .wordbank-sep {
+            color: #bbb;
+        }
+
+        .wordbank-en {
+            color: #666;
         }
 
         /* Card Screen */
@@ -599,7 +702,7 @@
         ];
 
         function FlashcardApp() {
-            const [screen, setScreen] = useState('setup'); // 'setup', 'card', 'finish'
+            const [screen, setScreen] = useState('setup'); // 'setup', 'card', 'finish', 'wordbank'
             const [selectedCategories, setSelectedCategories] = useState([]);
             const [startLanguage, setStartLanguage] = useState('finnish'); // 'finnish', 'english', 'random'
             const [deck, setDeck] = useState([]);
@@ -612,6 +715,7 @@
             const [leavingCard, setLeavingCard] = useState(null); // { label, content, isEnglish, dir, phase }
             const [selectedAction, setSelectedAction] = useState(null); // null, 'remove', 'keep'
             const selectedTimeoutRef = useRef(null);
+            const [expandedCategories, setExpandedCategories] = useState([]);
 
             const categories = [...new Set(VOCAB_DATA.map(item => item.category))].sort();
             
@@ -622,6 +726,14 @@
 
             const toggleCategory = (category) => {
                 setSelectedCategories(prev =>
+                    prev.includes(category)
+                        ? prev.filter(c => c !== category)
+                        : [...prev, category]
+                );
+            };
+
+            const toggleCategoryExpanded = (category) => {
+                setExpandedCategories(prev =>
                     prev.includes(category)
                         ? prev.filter(c => c !== category)
                         : [...prev, category]
@@ -826,9 +938,54 @@
                             </div>
                         </div>
 
-                        <button className="start-btn" onClick={startDrill}>
-                            Let's go! →
-                        </button>
+                        <div className="setup-actions">
+                            <button className="start-btn" onClick={startDrill}>
+                                Let's go! →
+                            </button>
+                            <button className="wordbank-btn" onClick={() => setScreen('wordbank')}>
+                                📖 Word Bank
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (screen === 'wordbank') {
+                return (
+                    <div className="container screen wordbank-screen">
+                        <div className="wordbank-header">
+                            <button className="nav-btn" onClick={() => setScreen('setup')}>← Back</button>
+                            <h2 className="wordbank-title">📖 Word Bank</h2>
+                        </div>
+
+                        <div className="wordbank-list">
+                            {categories.map(category => {
+                                const words = VOCAB_DATA.filter(item => item.category === category);
+                                const isExpanded = expandedCategories.includes(category);
+                                return (
+                                    <div className="wordbank-category" key={category}>
+                                        <button
+                                            className="wordbank-category-header"
+                                            onClick={() => toggleCategoryExpanded(category)}
+                                        >
+                                            <span>{category} ({words.length})</span>
+                                            <span className="wordbank-chevron">{isExpanded ? '▲' : '▼'}</span>
+                                        </button>
+                                        {isExpanded && (
+                                            <div className="wordbank-words">
+                                                {words.map((word, i) => (
+                                                    <div className="wordbank-word-row" key={i}>
+                                                        <span className="wordbank-fi">{word.finnish}</span>
+                                                        <span className="wordbank-sep">—</span>
+                                                        <span className="wordbank-en">{word.english}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 );
             }
