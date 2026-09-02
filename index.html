@@ -163,6 +163,12 @@
             border-color: #667eea;
         }
 
+        .option-btn-icon {
+            font-size: 20px;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
         .option-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -216,8 +222,8 @@
             flex: 2;
             padding: 15px 6px;
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: #666;
+            border: 2px solid #aaa;
             border-radius: 8px;
             font-size: 12px;
             font-weight: 600;
@@ -227,8 +233,9 @@
         }
 
         .wordbank-btn:hover {
-            background: #667eea;
+            background: #888;
             color: white;
+            border-color: #888;
         }
 
         /* Word Bank Screen */
@@ -613,18 +620,18 @@
             {"finnish": "valkoinen", "english": "white", "category": "Colors"},
             {"finnish": "vihreä", "english": "green", "category": "Colors"},
             {"finnish": "violetti", "english": "purple", "category": "Colors"},
-            {"finnish": "eilen", "english": "yesterday", "category": "Days of the Week"},
-            {"finnish": "huomenna", "english": "tomorrow", "category": "Days of the Week"},
-            {"finnish": "Keskiviikko", "english": "Wednesday", "category": "Days of the Week"},
-            {"finnish": "Lauantai", "english": "Saturday", "category": "Days of the Week"},
             {"finnish": "Maanantai", "english": "Monday", "category": "Days of the Week"},
-            {"finnish": "Perjantai", "english": "Friday", "category": "Days of the Week"},
-            {"finnish": "Sunnuntai", "english": "Sunday", "category": "Days of the Week"},
-            {"finnish": "tänään", "english": "today", "category": "Days of the Week"},
             {"finnish": "Tiistai", "english": "Tuesday", "category": "Days of the Week"},
-            {"finnish": "toissapäivänä", "english": "day before yesterday", "category": "Days of the Week"},
+            {"finnish": "Keskiviikko", "english": "Wednesday", "category": "Days of the Week"},
             {"finnish": "Torstai", "english": "Thursday", "category": "Days of the Week"},
+            {"finnish": "Perjantai", "english": "Friday", "category": "Days of the Week"},
+            {"finnish": "Lauantai", "english": "Saturday", "category": "Days of the Week"},
+            {"finnish": "Sunnuntai", "english": "Sunday", "category": "Days of the Week"},
             {"finnish": "Viikonloppu", "english": "Weekend", "category": "Days of the Week"},
+            {"finnish": "toissapäivänä", "english": "day before yesterday", "category": "Days of the Week"},
+            {"finnish": "eilen", "english": "yesterday", "category": "Days of the Week"},
+            {"finnish": "tänään", "english": "today", "category": "Days of the Week"},
+            {"finnish": "huomenna", "english": "tomorrow", "category": "Days of the Week"},
             {"finnish": "ylihuomenna", "english": "day after tomorrow", "category": "Days of the Week"},
             {"finnish": "Ei kestä!", "english": "No problem!", "category": "Conversations"},
             {"finnish": "Ei se mitään!", "english": "No problem!", "category": "Conversations"},
@@ -653,18 +660,22 @@
             {"finnish": "Nuku hyvin!", "english": "Sleep well!", "category": "Conversations"},
             {"finnish": "Ole hyvä", "english": "Here you go / Please", "category": "Conversations"},
             {"finnish": "Päivää!", "english": "Good day!", "category": "Conversations"},
-            {"finnish": "Elokuu", "english": "August", "category": "Months"},
-            {"finnish": "Heinäkuu", "english": "July", "category": "Months"},
-            {"finnish": "Helmikuu", "english": "February", "category": "Months"},
-            {"finnish": "Huhtikuu", "english": "April", "category": "Months"},
-            {"finnish": "Joulukuu", "english": "December", "category": "Months"},
-            {"finnish": "Kesäkuu", "english": "June", "category": "Months"},
-            {"finnish": "Lokakuu", "english": "October", "category": "Months"},
-            {"finnish": "Maaliskuu", "english": "March", "category": "Months"},
-            {"finnish": "Marraskuu", "english": "November", "category": "Months"},
-            {"finnish": "Syyskuu", "english": "September", "category": "Months"},
+            {"finnish": "Mikä päivä tänään on?", "english": "What day is today?", "category": "Conversations"},
+            {"finnish": "Mistä kaupuginsta se on kotoisin?", "english": "From where is their origin city?", "category": "Conversations"},
+            {"finnish": "Kuka sinä olet?", "english": "Who are you?", "category": "Conversations"},
+            {"finnish": "Mikä sinun nimi on?", "english": "What is your name?", "category": "Conversations"},
             {"finnish": "Tammikuu", "english": "January", "category": "Months"},
+            {"finnish": "Helmikuu", "english": "February", "category": "Months"},
+            {"finnish": "Maaliskuu", "english": "March", "category": "Months"},
+            {"finnish": "Huhtikuu", "english": "April", "category": "Months"},
             {"finnish": "Toukokuu", "english": "May", "category": "Months"},
+            {"finnish": "Kesäkuu", "english": "June", "category": "Months"},
+            {"finnish": "Heinäkuu", "english": "July", "category": "Months"},
+            {"finnish": "Elokuu", "english": "August", "category": "Months"},
+            {"finnish": "Syyskuu", "english": "September", "category": "Months"},
+            {"finnish": "Lokakuu", "english": "October", "category": "Months"},
+            {"finnish": "Marraskuu", "english": "November", "category": "Months"},
+            {"finnish": "Joulukuu", "english": "December", "category": "Months"},
             {"finnish": "äidinkieli", "english": "native language", "category": "Nouns"},
             {"finnish": "auto", "english": "car", "category": "Nouns"},
             {"finnish": "bussi", "english": "bus", "category": "Nouns"},
@@ -681,6 +692,7 @@
             {"finnish": "kiva", "english": "nice/cool", "category": "Nouns"},
             {"finnish": "koti", "english": "home", "category": "Nouns"},
             {"finnish": "kotitehtävä", "english": "homework", "category": "Nouns"},
+            {"finnish": "kotoisin", "english": "hometown / home country", "category": "Nouns"},
             {"finnish": "kurssi", "english": "course", "category": "Nouns"},
             {"finnish": "kurssipäivä", "english": "course day", "category": "Nouns"},
             {"finnish": "kuulokkeet", "english": "headphones", "category": "Nouns"},
@@ -741,16 +753,11 @@
             {"finnish": "Me olemme", "english": "We are", "category": "Personal Pronouns"},
             {"finnish": "minun", "english": "my/mine", "category": "Personal Pronouns"},
             {"finnish": "sinun", "english": "your/yours (singular)", "category": "Personal Pronouns"},
-            {"finnish": "kotoisin", "english": "hometown / home country", "category": "Nouns"},
             {"finnish": "Kuka?", "english": "Who?", "category": "Questions"},
             {"finnish": "Mikä?", "english": "What? or Which?", "category": "Questions"},
             {"finnish": "Miksi?", "english": "Why?", "category": "Questions"},
             {"finnish": "Milloin?", "english": "When?", "category": "Questions"},
             {"finnish": "Missä", "english": "Where?", "category": "Questions"},
-            {"finnish": "Mikä päivä tänään on?", "english": "What day is today?", "category": "Conversations"},
-            {"finnish": "Mistä kaupuginsta se on kotoisin?", "english": "From where is their origin city?", "category": "Conversations"},
-            {"finnish": "Kuka sinä olet?", "english": "Who are you?", "category": "Conversations"},
-            {"finnish": "Mikä sinun nimi on?", "english": "What is your name?", "category": "Conversations"},
             {"finnish": "Mistä", "english": "from (where)", "category": "Questions"},
             {"finnish": "Mitä?", "english": "What?", "category": "Questions"},
             {"finnish": "Miten?", "english": "How?", "category": "Questions"},
@@ -1117,7 +1124,7 @@
                 return (
                     <div className="container screen">
                         <div className="setup-section">
-                            <h2>📚 Select Categories for Flashcards</h2>
+                            <h2>📚 Select Categories</h2>
                             <div className="category-grid">
                                 {categories.map(category => (
                                     <button
@@ -1134,25 +1141,28 @@
                         </div>
 
                         <div className="setup-section">
-                            <h2>🎯 Card Format</h2>
+                            <h2>🎯 Flashcard Mode</h2>
                             <div className="option-group">
-                                <button
-                                    className={`option-btn ${startLanguage === 'finnish' ? 'active' : ''}`}
-                                    onClick={() => setStartLanguage('finnish')}
-                                >
-                                    🇫🇮 Finnish First
-                                </button>
                                 <button
                                     className={`option-btn ${startLanguage === 'english' ? 'active' : ''}`}
                                     onClick={() => setStartLanguage('english')}
                                 >
-                                    🇬🇧 English First
+                                    <div className="option-btn-icon">🇬🇧</div>
+                                    <div>English First</div>
+                                </button>
+                                <button
+                                    className={`option-btn ${startLanguage === 'finnish' ? 'active' : ''}`}
+                                    onClick={() => setStartLanguage('finnish')}
+                                >
+                                    <div className="option-btn-icon">🇫🇮</div>
+                                    <div>Finnish First</div>
                                 </button>
                                 <button
                                     className={`option-btn challenge ${startLanguage === 'challenge' ? 'active' : ''}`}
                                     onClick={() => setStartLanguage('challenge')}
                                 >
-                                    🔥 Challenge Mode
+                                    <div className="option-btn-icon">🔥</div>
+                                    <div>Challenge Mode</div>
                                 </button>
                             </div>
                         </div>
@@ -1326,7 +1336,7 @@
                                     <span className="stats-label">✓ Correct:</span> {removed}
                                 </div>
                                 <div className="stats-item">
-                                    <span className="stats-label">✗ Rereviewed:</span> {kept}
+                                    <span className="stats-label">✗ Missed:</span> {kept}
                                 </div>
                                 <div className="stats-item">
                                     <span className="stats-label">Accuracy:</span> {percentage}%
