@@ -169,6 +169,17 @@
             border-color: #667eea;
         }
 
+        .option-btn.challenge {
+            color: #e67e22;
+            border-color: #e67e22;
+        }
+
+        .option-btn.challenge.active {
+            background: linear-gradient(135deg, #f7971e 0%, #e67e22 100%);
+            color: white;
+            border-color: #e67e22;
+        }
+
         .setup-divider {
             border-top: 1px solid #e5e5e5;
             margin-top: 20px;
@@ -182,12 +193,12 @@
 
         .start-btn {
             flex: 3;
-            padding: 15px 8px;
+            padding: 15px 6px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
@@ -201,34 +212,16 @@
             transform: translateY(0);
         }
 
-        .challenge-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 12px;
-            background: white;
-            color: #e67e22;
-            border: 2px solid #e67e22;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .challenge-btn:hover {
-            background: #e67e22;
-            color: white;
-        }
-
         .wordbank-btn {
             flex: 2;
-            padding: 15px 8px;
+            padding: 15px 6px;
             background: white;
             color: #667eea;
             border: 2px solid #667eea;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
+            line-height: 1.3;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -315,6 +308,41 @@
 
         .wordbank-en {
             color: #666;
+        }
+
+        /* Letter Sounds Screen */
+        .letter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .letter-card {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 12px 6px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+
+        .letter-char {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .letter-sound {
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            margin-top: 4px;
+        }
+
+        .letter-example {
+            font-size: 10px;
+            font-style: italic;
+            color: #999;
+            margin-top: 2px;
         }
 
         /* Card Screen */
@@ -575,192 +603,225 @@
         const { useState, useEffect, useRef } = React;
 
         const VOCAB_DATA = [
-            {"finnish": "punainen", "english": "red", "category": "Colors"},
-            {"finnish": "sininen", "english": "blue", "category": "Colors"},
-            {"finnish": "keltainen", "english": "yellow", "category": "Colors"},
-            {"finnish": "oranssi", "english": "orange", "category": "Colors"},
-            {"finnish": "vihreä", "english": "green", "category": "Colors"},
-            {"finnish": "musta", "english": "black", "category": "Colors"},
             {"finnish": "harmaa", "english": "gray", "category": "Colors"},
-            {"finnish": "valkoinen", "english": "white", "category": "Colors"},
+            {"finnish": "keltainen", "english": "yellow", "category": "Colors"},
+            {"finnish": "musta", "english": "black", "category": "Colors"},
+            {"finnish": "oranssi", "english": "orange", "category": "Colors"},
+            {"finnish": "punainen", "english": "red", "category": "Colors"},
             {"finnish": "ruskea", "english": "brown", "category": "Colors"},
+            {"finnish": "sininen", "english": "blue", "category": "Colors"},
+            {"finnish": "valkoinen", "english": "white", "category": "Colors"},
+            {"finnish": "vihreä", "english": "green", "category": "Colors"},
             {"finnish": "violetti", "english": "purple", "category": "Colors"},
-            {"finnish": "Maanantai", "english": "Monday", "category": "Days of the Week"},
-            {"finnish": "Tiistai", "english": "Tuesday", "category": "Days of the Week"},
-            {"finnish": "Keskiviikko", "english": "Wednesday", "category": "Days of the Week"},
-            {"finnish": "Torstai", "english": "Thursday", "category": "Days of the Week"},
-            {"finnish": "Perjantai", "english": "Friday", "category": "Days of the Week"},
-            {"finnish": "Lauantai", "english": "Saturday", "category": "Days of the Week"},
-            {"finnish": "Sunnuntai", "english": "Sunday", "category": "Days of the Week"},
-            {"finnish": "Viikonloppu", "english": "Weekend", "category": "Days of the Week"},
-            {"finnish": "Nähdään!", "english": "See you!", "category": "Expressions"},
-            {"finnish": "Nähdään huomenna!", "english": "See you tomorrow!", "category": "Expressions"},
-            {"finnish": "Heippa!", "english": "Bye!", "category": "Expressions"},
-            {"finnish": "Hauska tutustua!", "english": "Nice to meet you!", "category": "Expressions"},
-            {"finnish": "Tässä on Iina.", "english": "This is Iina.", "category": "Expressions"},
-            {"finnish": "Kiitos samoin!", "english": "Thanks, same to you!", "category": "Expressions"},
-            {"finnish": "Näkemiini!", "english": "See you!", "category": "Expressions"},
-            {"finnish": "Kylla", "english": "Yes", "category": "Expressions"},
-            {"finnish": "Ole hyvä", "english": "Here you go/Please", "category": "Expressions"},
-            {"finnish": "Ei kestä!", "english": "No problem!", "category": "Expressions"},
-            {"finnish": "Ei se mitään!", "english": "No problem!", "category": "Expressions"},
-            {"finnish": "Kippis! / Skool!", "english": "Cheers!", "category": "Expressions"},
-            {"finnish": "Hyvää ruokahalua!", "english": "Bon appétit!", "category": "Expressions"},
-            {"finnish": "Kiitos ruoasta!", "english": "Thanks for the meal!", "category": "Expressions"},
-            {"finnish": "Kiitos, oli hyvää.", "english": "Thanks, it was good.", "category": "Expressions"},
-            {"finnish": "Hyvää huomenta!", "english": "Good morning!", "category": "Expressions"},
-            {"finnish": "Huomenta!", "english": "Good morning!", "category": "Expressions"},
-            {"finnish": "Päivää!", "english": "Good day!", "category": "Expressions"},
-            {"finnish": "Hyvää päivää!", "english": "Good day!", "category": "Expressions"},
-            {"finnish": "Hyvää iltaa!", "english": "Good evening!", "category": "Expressions"},
-            {"finnish": "Iltaa!", "english": "Evening!", "category": "Expressions"},
-            {"finnish": "Hyvää yötä!", "english": "Good night!", "category": "Expressions"},
-            {"finnish": "Nuku hyvin!", "english": "Sleep well!", "category": "Expressions"},
-            {"finnish": "Mitä kuuluu?", "english": "How are you?", "category": "Expressions"},
-            {"finnish": "Minulle kuuluu hyvää.", "english": "I'm doing well.", "category": "Expressions"},
-            {"finnish": "Entä sinulle?", "english": "And you?", "category": "Expressions"},
-            {"finnish": "Ihan hyvää, kiitos.", "english": "Pretty good, thanks.", "category": "Expressions"},
-            {"finnish": "Miten se kirjoitetaan?", "english": "How is it spelled?", "category": "Expressions"},
-            {"finnish": "Tammikuu", "english": "January", "category": "Months"},
-            {"finnish": "Helmikuu", "english": "February", "category": "Months"},
-            {"finnish": "Maaliskuu", "english": "March", "category": "Months"},
-            {"finnish": "Huhtikuu", "english": "April", "category": "Months"},
-            {"finnish": "Toukokuu", "english": "May", "category": "Months"},
-            {"finnish": "Kesäkuu", "english": "June", "category": "Months"},
-            {"finnish": "Heinäkuu", "english": "July", "category": "Months"},
-            {"finnish": "Elokuu", "english": "August", "category": "Months"},
-            {"finnish": "Syyskuu", "english": "September", "category": "Months"},
-            {"finnish": "Lokakuu", "english": "October", "category": "Months"},
-            {"finnish": "Marraskuu", "english": "November", "category": "Months"},
-            {"finnish": "Joulukuu", "english": "December", "category": "Months"},
-            {"finnish": "toissapäivänä", "english": "the day before yesterday", "category": "Days of the Week"},
             {"finnish": "eilen", "english": "yesterday", "category": "Days of the Week"},
-            {"finnish": "tänään", "english": "today", "category": "Days of the Week"},
             {"finnish": "huomenna", "english": "tomorrow", "category": "Days of the Week"},
-            {"finnish": "ylihuomenna", "english": "the day after tomorrow", "category": "Days of the Week"},
+            {"finnish": "Keskiviikko", "english": "Wednesday", "category": "Days of the Week"},
+            {"finnish": "Lauantai", "english": "Saturday", "category": "Days of the Week"},
+            {"finnish": "Maanantai", "english": "Monday", "category": "Days of the Week"},
+            {"finnish": "Perjantai", "english": "Friday", "category": "Days of the Week"},
+            {"finnish": "Sunnuntai", "english": "Sunday", "category": "Days of the Week"},
+            {"finnish": "tänään", "english": "today", "category": "Days of the Week"},
+            {"finnish": "Tiistai", "english": "Tuesday", "category": "Days of the Week"},
+            {"finnish": "toissapäivänä", "english": "day before yesterday", "category": "Days of the Week"},
+            {"finnish": "Torstai", "english": "Thursday", "category": "Days of the Week"},
+            {"finnish": "Viikonloppu", "english": "Weekend", "category": "Days of the Week"},
+            {"finnish": "ylihuomenna", "english": "day after tomorrow", "category": "Days of the Week"},
+            {"finnish": "Ei kestä!", "english": "No problem!", "category": "Conversatons"},
+            {"finnish": "Ei se mitään!", "english": "No problem!", "category": "Conversatons"},
+            {"finnish": "Entä sinulle?", "english": "And you?", "category": "Conversatons"},
+            {"finnish": "Hauska tutustua!", "english": "Nice to meet you!", "category": "Conversatons"},
+            {"finnish": "Heippa!", "english": "Bye!", "category": "Conversatons"},
+            {"finnish": "Huomenta!", "english": "Morning!", "category": "Conversatons"},
+            {"finnish": "Hyvää huomenta!", "english": "Good morning!", "category": "Conversatons"},
+            {"finnish": "Hyvää iltaa!", "english": "Good evening!", "category": "Conversatons"},
+            {"finnish": "Hyvää päivää!", "english": "Good day!", "category": "Conversatons"},
+            {"finnish": "Hyvää ruokahalua!", "english": "Bon appétit!", "category": "Conversatons"},
+            {"finnish": "Hyvää yötä!", "english": "Good night!", "category": "Conversatons"},
+            {"finnish": "Ihan hyvää, kiitos.", "english": "Pretty good, thanks.", "category": "Conversatons"},
+            {"finnish": "Iltaa!", "english": "Evening!", "category": "Conversatons"},
+            {"finnish": "Kiitos ruoasta!", "english": "Thanks for the meal!", "category": "Conversatons"},
+            {"finnish": "Kiitos samoin!", "english": "Thanks, same to you!", "category": "Conversatons"},
+            {"finnish": "Kiitos, oli hyvää.", "english": "Thanks, it was good.", "category": "Conversatons"},
+            {"finnish": "Kippis! / Skool!", "english": "Cheers!", "category": "Conversatons"},
+            {"finnish": "Kylla", "english": "Yes", "category": "Conversatons"},
+            {"finnish": "Minulle kuuluu hyvää.", "english": "I'm doing well.", "category": "Conversatons"},
+            {"finnish": "Mitä kuuluu?", "english": "How are you?", "category": "Conversatons"},
+            {"finnish": "Miten se kirjoitetaan?", "english": "How is it spelled?", "category": "Conversatons"},
+            {"finnish": "Nähdään huomenna!", "english": "See you tomorrow!", "category": "Conversatons"},
+            {"finnish": "Nähdään!", "english": "See you!", "category": "Conversatons"},
+            {"finnish": "Näkemiini!", "english": "See you!", "category": "Conversatons"},
+            {"finnish": "Nuku hyvin!", "english": "Sleep well!", "category": "Conversatons"},
+            {"finnish": "Ole hyvä", "english": "Here you go / Please", "category": "Conversatons"},
+            {"finnish": "Päivää!", "english": "Good day!", "category": "Conversatons"},
+            {"finnish": "Elokuu", "english": "August", "category": "Months"},
+            {"finnish": "Heinäkuu", "english": "July", "category": "Months"},
+            {"finnish": "Helmikuu", "english": "February", "category": "Months"},
+            {"finnish": "Huhtikuu", "english": "April", "category": "Months"},
+            {"finnish": "Joulukuu", "english": "December", "category": "Months"},
+            {"finnish": "Kesäkuu", "english": "June", "category": "Months"},
+            {"finnish": "Lokakuu", "english": "October", "category": "Months"},
+            {"finnish": "Maaliskuu", "english": "March", "category": "Months"},
+            {"finnish": "Marraskuu", "english": "November", "category": "Months"},
+            {"finnish": "Syyskuu", "english": "September", "category": "Months"},
+            {"finnish": "Tammikuu", "english": "January", "category": "Months"},
+            {"finnish": "Toukokuu", "english": "May", "category": "Months"},
+            {"finnish": "äidinkieli", "english": "native language", "category": "Nouns"},
             {"finnish": "auto", "english": "car", "category": "Nouns"},
             {"finnish": "bussi", "english": "bus", "category": "Nouns"},
             {"finnish": "bussipysäkki", "english": "bus stop", "category": "Nouns"},
-            {"finnish": "metro", "english": "subway", "category": "Nouns"},
-            {"finnish": "koti", "english": "home", "category": "Nouns"},
-            {"finnish": "puisto", "english": "park", "category": "Nouns"},
-            {"finnish": "Brasilia", "english": "Brazil", "category": "Nouns"},
-            {"finnish": "kieli", "english": "language", "category": "Nouns"},
-            {"finnish": "äidinkieli", "english": "native language", "category": "Nouns"},
-            {"finnish": "opiskelija", "english": "student", "category": "Nouns"},
-            {"finnish": "opettaja", "english": "teacher", "category": "Nouns"},
-            {"finnish": "luokka", "english": "classroom", "category": "Nouns"},
-            {"finnish": "tietokone", "english": "computer", "category": "Nouns"},
-            {"finnish": "puhelin", "english": "phone", "category": "Nouns"},
-            {"finnish": "paperi", "english": "paper", "category": "Nouns"},
-            {"finnish": "kynä", "english": "pen", "category": "Nouns"},
-            {"finnish": "kirja", "english": "book", "category": "Nouns"},
-            {"finnish": "taulu", "english": "chalkboard", "category": "Nouns"},
-            {"finnish": "tuoli", "english": "chair", "category": "Nouns"},
-            {"finnish": "pöytä", "english": "table", "category": "Nouns"},
-            {"finnish": "kotitehtävä", "english": "homework", "category": "Nouns"},
-            {"finnish": "näppäimistö", "english": "keyboard", "category": "Nouns"},
-            {"finnish": "hiiri", "english": "mouse", "category": "Nouns"},
-            {"finnish": "näyttö", "english": "screen", "category": "Nouns"},
-            {"finnish": "ikkuna", "english": "window", "category": "Nouns"},
-            {"finnish": "ovi", "english": "door", "category": "Nouns"},
-            {"finnish": "kello", "english": "clock", "category": "Nouns"},
-            {"finnish": "selain", "english": "browser", "category": "Nouns"},
-            {"finnish": "vessa", "english": "bathroom", "category": "Nouns"},
-            {"finnish": "kuulokkeet", "english": "headphones", "category": "Nouns"},
-            {"finnish": "kioski", "english": "kiosk", "category": "Nouns"},
-            {"finnish": "jäätelö", "english": "ice cream", "category": "Nouns"},
-            {"finnish": "euro", "english": "euro", "category": "Nouns"},
-            {"finnish": "raha", "english": "money", "category": "Nouns"},
-            {"finnish": "totta", "english": "true", "category": "Nouns"},
-            {"finnish": "kurssi", "english": "course", "category": "Nouns"},
-            {"finnish": "paikka", "english": "place", "category": "Nouns"},
-            {"finnish": "vapaa", "english": "free/vacant", "category": "Nouns"},
-            {"finnish": "kiva", "english": "nice/cool", "category": "Nouns"},
-            {"finnish": "nimi", "english": "name", "category": "Nouns"},
             {"finnish": "etunimi", "english": "first name", "category": "Nouns"},
-            {"finnish": "sukunimi", "english": "last name", "category": "Nouns"},
+            {"finnish": "euro", "english": "euro", "category": "Nouns"},
+            {"finnish": "hiiri", "english": "mouse", "category": "Nouns"},
+            {"finnish": "ikkuna", "english": "window", "category": "Nouns"},
+            {"finnish": "jäätelö", "english": "ice cream", "category": "Nouns"},
+            {"finnish": "kello", "english": "clock", "category": "Nouns"},
+            {"finnish": "kieli", "english": "language", "category": "Nouns"},
+            {"finnish": "kioski", "english": "kiosk", "category": "Nouns"},
+            {"finnish": "kirja", "english": "book", "category": "Nouns"},
+            {"finnish": "kiva", "english": "nice/cool", "category": "Nouns"},
+            {"finnish": "koti", "english": "home", "category": "Nouns"},
+            {"finnish": "kotitehtävä", "english": "homework", "category": "Nouns"},
+            {"finnish": "kurssi", "english": "course", "category": "Nouns"},
             {"finnish": "kurssipäivä", "english": "course day", "category": "Nouns"},
-            {"finnish": "nolla", "english": "0", "category": "Numbers"},
-            {"finnish": "yksi", "english": "1", "category": "Numbers"},
-            {"finnish": "kaksi", "english": "2", "category": "Numbers"},
-            {"finnish": "kolme", "english": "3", "category": "Numbers"},
-            {"finnish": "neljä", "english": "4", "category": "Numbers"},
-            {"finnish": "viisi", "english": "5", "category": "Numbers"},
-            {"finnish": "kuusi", "english": "6", "category": "Numbers"},
-            {"finnish": "seitsemän", "english": "7", "category": "Numbers"},
+            {"finnish": "kuulokkeet", "english": "headphones", "category": "Nouns"},
+            {"finnish": "kynä", "english": "pen", "category": "Nouns"},
+            {"finnish": "luokka", "english": "classroom", "category": "Nouns"},
+            {"finnish": "metro", "english": "subway", "category": "Nouns"},
+            {"finnish": "näppäimistö", "english": "keyboard", "category": "Nouns"},
+            {"finnish": "näyttö", "english": "screen", "category": "Nouns"},
+            {"finnish": "nimi", "english": "name", "category": "Nouns"},
+            {"finnish": "opettaja", "english": "teacher", "category": "Nouns"},
+            {"finnish": "opiskelija", "english": "student", "category": "Nouns"},
+            {"finnish": "ovi", "english": "door", "category": "Nouns"},
+            {"finnish": "paikka", "english": "place", "category": "Nouns"},
+            {"finnish": "paperi", "english": "paper", "category": "Nouns"},
+            {"finnish": "pöytä", "english": "table", "category": "Nouns"},
+            {"finnish": "puhelin", "english": "phone", "category": "Nouns"},
+            {"finnish": "puisto", "english": "park", "category": "Nouns"},
+            {"finnish": "raha", "english": "money", "category": "Nouns"},
+            {"finnish": "selain", "english": "browser", "category": "Nouns"},
+            {"finnish": "sukunimi", "english": "last name", "category": "Nouns"},
+            {"finnish": "taulu", "english": "chalkboard", "category": "Nouns"},
+            {"finnish": "tietokone", "english": "computer", "category": "Nouns"},
+            {"finnish": "totta", "english": "true", "category": "Nouns"},
+            {"finnish": "tuoli", "english": "chair", "category": "Nouns"},
+            {"finnish": "vapaa", "english": "free / vacant", "category": "Nouns"},
+            {"finnish": "vessa", "english": "bathroom", "category": "Nouns"},
             {"finnish": "kahdeksan", "english": "8", "category": "Numbers"},
-            {"finnish": "yhdeksän", "english": "9", "category": "Numbers"},
-            {"finnish": "kymmenen", "english": "10", "category": "Numbers"},
-            {"finnish": "yksitoista", "english": "11", "category": "Numbers"},
-            {"finnish": "kaksitoista", "english": "12", "category": "Numbers"},
-            {"finnish": "kolmetoista", "english": "13", "category": "Numbers"},
-            {"finnish": "neljätoista", "english": "14", "category": "Numbers"},
-            {"finnish": "viisitoista", "english": "15", "category": "Numbers"},
-            {"finnish": "kuusitoista", "english": "16", "category": "Numbers"},
-            {"finnish": "seitsemäntoista", "english": "17", "category": "Numbers"},
             {"finnish": "kahdeksantoista", "english": "18", "category": "Numbers"},
-            {"finnish": "yhdeksäntoista", "english": "19", "category": "Numbers"},
+            {"finnish": "kaksi", "english": "2", "category": "Numbers"},
             {"finnish": "kaksikymmentä", "english": "20", "category": "Numbers"},
+            {"finnish": "kaksisataa", "english": "200", "category": "Numbers"},
+            {"finnish": "kaksitoista", "english": "12", "category": "Numbers"},
+            {"finnish": "kolme", "english": "3", "category": "Numbers"},
+            {"finnish": "kolmesataa", "english": "300", "category": "Numbers"},
+            {"finnish": "kolmetoista", "english": "13", "category": "Numbers"},
+            {"finnish": "kuusi", "english": "6", "category": "Numbers"},
+            {"finnish": "kuusitoista", "english": "16", "category": "Numbers"},
+            {"finnish": "kymmenen", "english": "10", "category": "Numbers"},
+            {"finnish": "neljä", "english": "4", "category": "Numbers"},
+            {"finnish": "neljätoista", "english": "14", "category": "Numbers"},
+            {"finnish": "nolla", "english": "0", "category": "Numbers"},
             {"finnish": "sata", "english": "100", "category": "Numbers"},
             {"finnish": "satayksi", "english": "101", "category": "Numbers"},
-            {"finnish": "kaksisataa", "english": "200", "category": "Numbers"},
-            {"finnish": "kolmesataa", "english": "300", "category": "Numbers"},
+            {"finnish": "seitsemän", "english": "7", "category": "Numbers"},
+            {"finnish": "seitsemäntoista", "english": "17", "category": "Numbers"},
+            {"finnish": "viisi", "english": "5", "category": "Numbers"},
+            {"finnish": "viisitoista", "english": "15", "category": "Numbers"},
+            {"finnish": "yhdeksän", "english": "9", "category": "Numbers"},
+            {"finnish": "yhdeksäntoista", "english": "19", "category": "Numbers"},
+            {"finnish": "yksi", "english": "1", "category": "Numbers"},
+            {"finnish": "yksitoista", "english": "11", "category": "Numbers"},
             {"finnish": "Minä olen", "english": "I am", "category": "Personal Pronouns"},
             {"finnish": "Sinä olet", "english": "You are (singular)", "category": "Personal Pronouns"},
             {"finnish": "Hän on", "english": "He/She is", "category": "Personal Pronouns"},
-            {"finnish": "Me olemme", "english": "We are", "category": "Personal Pronouns"},
+            {"finnish": "Se on", "english": "It is", "category": "Personal Pronouns"},
             {"finnish": "Te olette", "english": "You are (plural/formal)", "category": "Personal Pronouns"},
             {"finnish": "He ovat", "english": "They are", "category": "Personal Pronouns"},
-            {"finnish": "sinä", "english": "you (singular)", "category": "Personal Pronouns"},
-            {"finnish": "te", "english": "you (plural/formal)", "category": "Personal Pronouns"},
+            {"finnish": "Me olemme", "english": "We are", "category": "Personal Pronouns"},
             {"finnish": "minun", "english": "my/mine", "category": "Personal Pronouns"},
+            {"finnish": "sinun", "english": "your/yours (singular)", "category": "Personal Pronouns"},
+            {"finnish": "kotoisin", "english": "hometown / home country", "category": "Nouns"},
+            {"finnish": "Kuka?", "english": "Who?", "category": "Questions"},
+            {"finnish": "Mikä?", "english": "What? or Which?", "category": "Questions"},
+            {"finnish": "Miksi?", "english": "Why?", "category": "Questions"},
+            {"finnish": "Milloin?", "english": "When?", "category": "Questions"},
+            {"finnish": "minkämaalainen", "english": "What nationality?", "category": "Questions"},
+            {"finnish": "Missä", "english": "Where?", "category": "Questions"},
+            {"finnish": "Mikä päivä tänään on?", "english": "What day is today?", "category": "Conversatons"},
+            {"finnish": "Mistä kaupuginsta se on kotoisin?", "english": "From where is their origin city?", "category": "Conversatons"},
+            {"finnish": "Kuka sinä olet?", "english": "Who are you?", "category": "Conversations"},
+            {"finnish": "Mikä sinun nimi on?", "english": "What is your name?", "category": "Conversations"},
+            {"finnish": "Mistä", "english": "from (where)", "category": "Questions"},
+            {"finnish": "Mitä?", "english": "What?", "category": "Questions"},
+            {"finnish": "Miten?", "english": "How?", "category": "Questions"},
+            {"finnish": "ei ... vaan", "english": "not...but", "category": "Small Words"},
+            {"finnish": "ensin", "english": "first", "category": "Small Words"},
+            {"finnish": "ihan", "english": "quite", "category": "Small Words"},
             {"finnish": "ja", "english": "and", "category": "Small Words"},
-            {"finnish": "muu", "english": "other", "category": "Small Words"},
             {"finnish": "koska", "english": "because", "category": "Small Words"},
-            {"finnish": "sitten", "english": "then", "category": "Small Words"},
+            {"finnish": "mutta", "english": "but", "category": "Small Words"},
+            {"finnish": "muu", "english": "other", "category": "Small Words"},
             {"finnish": "myös", "english": "also", "category": "Small Words"},
             {"finnish": "nyt", "english": "now", "category": "Small Words"},
-            {"finnish": "ensin", "english": "first", "category": "Small Words"},
+            {"finnish": "sitten", "english": "then", "category": "Small Words"},
+            {"finnish": "täällä", "english": "here (general)", "category": "Small Words"},
+            {"finnish": "tämä", "english": "this", "category": "Small words"},
+            {"finnish": "tässä", "english": "right here (exact)", "category": "Small Words"},
+            {"finnish": "tuossa", "english": "over there (exact spot)", "category": "Small Words"},
             {"finnish": "vähän", "english": "little", "category": "Small Words"},
-            {"finnish": "ei ... vaan", "english": "not...but", "category": "Small Words"},
-            {"finnish": "mutta", "english": "but", "category": "Small Words"},
-            {"finnish": "missä", "english": "where", "category": "Questions"},
-            {"finnish": "mistä", "english": "from (where)", "category": "Questions"},
-            {"finnish": "kotoisin", "english": "from", "category": "Questions"},
-            {"finnish": "Kuka?", "english": "Who?", "category": "Questions"},
-            {"finnish": "Mitä?", "english": "What?", "category": "Questions"},
-            {"finnish": "Milloin?", "english": "When?", "category": "Questions"},
-            {"finnish": "Miksi?", "english": "Why?", "category": "Questions"},
-            {"finnish": "Miten?", "english": "How?", "category": "Questions"},
-            {"finnish": "Mikä?", "english": "Which?", "category": "Questions"},
-            {"finnish": "minkämaalainen", "english": "from which country", "category": "Questions"},
-            {"finnish": "Ai jaa!", "english": "I see!", "category": "Expressions"},
-            {"finnish": "Ai niin!", "english": "Oh yes!", "category": "Expressions"},
-            {"finnish": "tämä", "english": "this", "category": "Small Words"},
-            {"finnish": "ihan", "english": "quite", "category": "Small Words"},
-            {"finnish": "asua", "english": "to live", "category": "Verbs"},
-            {"finnish": "tulla", "english": "to come", "category": "Verbs"},
             {"finnish": "ajaa", "english": "to drive", "category": "Verbs"},
-            {"finnish": "kirjoittaa", "english": "to write", "category": "Verbs"},
-            {"finnish": "lukea", "english": "to read", "category": "Verbs"},
-            {"finnish": "puhua", "english": "to speak", "category": "Verbs"},
-            {"finnish": "nauraa", "english": "to laugh", "category": "Verbs"},
-            {"finnish": "ostaa", "english": "to buy", "category": "Verbs"},
-            {"finnish": "maksaa", "english": "to cost", "category": "Verbs"},
-            {"finnish": "säästää", "english": "to save", "category": "Verbs"},
-            {"finnish": "loppua", "english": "to end", "category": "Verbs"},
-            {"finnish": "mennä", "english": "to go", "category": "Verbs"},
-            {"finnish": "istua", "english": "to sit", "category": "Verbs"},
+            {"finnish": "asua", "english": "to live", "category": "Verbs"},
             {"finnish": "en puhu", "english": "I don't speak", "category": "Verbs"},
-            {"finnish": "onko", "english": "is (question form)", "category": "Verbs"},
+            {"finnish": "istua", "english": "to sit", "category": "Verbs"},
+            {"finnish": "kirjoittaa", "english": "to write", "category": "Verbs"},
+            {"finnish": "loppua", "english": "to end", "category": "Verbs"},
+            {"finnish": "lukea", "english": "to read", "category": "Verbs"},
+            {"finnish": "maksaa", "english": "to cost", "category": "Verbs"},
+            {"finnish": "mennä", "english": "to go", "category": "Verbs"},
+            {"finnish": "nauraa", "english": "to laugh", "category": "Verbs"},
             {"finnish": "olla", "english": "to be", "category": "Verbs"},
+            {"finnish": "ostaa", "english": "to buy", "category": "Verbs"},
+            {"finnish": "puhua", "english": "to speak", "category": "Verbs"},
+            {"finnish": "säästää", "english": "to save", "category": "Verbs"},
+            {"finnish": "tulla", "english": "to come", "category": "Verbs"},
+            {"finnish": "-sta / stä", "english": "Place of origin (suffix)", "category": "Suffixes"},
+            {"finnish": "-lainen / läinen", "english": "Nationality (suffix)", "category": "Suffixes"},
+            {"finnish": "-a / ä", "english": "Spoken Langauge (suffix)", "category": "Suffixes"},
+            {"finnish": "A", "english": "aah (aunt)", "category": "Letter Sounds"},
+            {"finnish": "B", "english": "beh (best)", "category": "Letter Sounds"},
+            {"finnish": "C", "english": "seh (cement)", "category": "Letter Sounds"},
+            {"finnish": "D", "english": "deh (demo)", "category": "Letter Sounds"},
+            {"finnish": "E", "english": "eeh (electric)", "category": "Letter Sounds"},
+            {"finnish": "F", "english": "aeff (affection)", "category": "Letter Sounds"},
+            {"finnish": "G", "english": "geh (gave)", "category": "Letter Sounds"},
+            {"finnish": "H", "english": "hoh (hold)", "category": "Letter Sounds"},
+            {"finnish": "I", "english": "eeh (eat)", "category": "Letter Sounds"},
+            {"finnish": "J", "english": "yee (yield)", "category": "Letter Sounds"},
+            {"finnish": "K", "english": "kooh (covert)", "category": "Letter Sounds"},
+            {"finnish": "L", "english": "ael (altitude)", "category": "Letter Sounds"},
+            {"finnish": "M", "english": "aem (ambrosia)", "category": "Letter Sounds"},
+            {"finnish": "N", "english": "aen (ant)", "category": "Letter Sounds"},
+            {"finnish": "O", "english": "ooh (oval)", "category": "Letter Sounds"},
+            {"finnish": "P", "english": "peeh (pellet)", "category": "Letter Sounds"},
+            {"finnish": "Q", "english": "kuuh (cook)", "category": "Letter Sounds"},
+            {"finnish": "R", "english": "aer (arrogant)", "category": "Letter Sounds"},
+            {"finnish": "S", "english": "aes (ask)", "category": "Letter Sounds"},
+            {"finnish": "T", "english": "teeh (tepid)", "category": "Letter Sounds"},
+            {"finnish": "U", "english": "oo (foot)", "category": "Letter Sounds"},
+            {"finnish": "V", "english": "veeh (very)", "category": "Letter Sounds"},
+            {"finnish": "W", "english": "kahksoisveeh (very)", "category": "Letter Sounds"},
+            {"finnish": "X", "english": "aex (axe)", "category": "Letter Sounds"},
+            {"finnish": "Y", "english": "eew (cute)", "category": "Letter Sounds"},
+            {"finnish": "Z", "english": "tset (like ts)", "category": "Letter Sounds"},
+            {"finnish": "Ä", "english": "aeae (Adam, apple)", "category": "Letter Sounds"},
+            {"finnish": "Ö", "english": "oeoe (Curl, girl, word)", "category": "Letter Sounds"},
         ];
 
         function FlashcardApp() {
-            const [screen, setScreen] = useState('setup'); // 'setup', 'card', 'finish', 'wordbank'
+            const [screen, setScreen] = useState('setup'); // 'setup', 'card', 'finish', 'wordbank', 'letterSounds'
             const [selectedCategories, setSelectedCategories] = useState([]);
-            const [startLanguage, setStartLanguage] = useState('finnish'); // 'finnish', 'english', 'random'
+            const [startLanguage, setStartLanguage] = useState('finnish'); // 'finnish', 'english', 'challenge'
             const [deck, setDeck] = useState([]);
             const [totalCount, setTotalCount] = useState(0);
             const [isFlipped, setIsFlipped] = useState(false);
@@ -782,7 +843,12 @@
                 }
             });
 
-            const categories = [...new Set(VOCAB_DATA.map(item => item.category))].sort();
+            // "Letter Sounds" is a pronunciation reference chart, not a drillable
+            // flashcard category, so it's kept out of the category list entirely.
+            const categories = [...new Set(VOCAB_DATA.map(item => item.category))]
+                .filter(category => category !== 'Letter Sounds')
+                .sort();
+            const letterSounds = VOCAB_DATA.filter(item => item.category === 'Letter Sounds');
 
             // Count words in each category
             const getCategoryCount = (category) => {
@@ -864,6 +930,11 @@
             const startDrill = () => {
                 if (selectedCategories.length === 0) {
                     alert('Please select at least one category');
+                    return;
+                }
+
+                if (startLanguage === 'challenge') {
+                    startChallengeMode();
                     return;
                 }
 
@@ -1080,10 +1151,13 @@
                                 >
                                     🇬🇧 English First
                                 </button>
+                                <button
+                                    className={`option-btn challenge ${startLanguage === 'challenge' ? 'active' : ''}`}
+                                    onClick={() => setStartLanguage('challenge')}
+                                >
+                                    🔥 Challenge Mode
+                                </button>
                             </div>
-                            <button className="challenge-btn" onClick={startChallengeMode}>
-                                🔥 Challenge Mode
-                            </button>
                         </div>
 
                         <div className="setup-divider"></div>
@@ -1091,6 +1165,9 @@
                         <div className="setup-actions">
                             <button className="wordbank-btn" onClick={() => setScreen('wordbank')}>
                                 📖 Word Bank
+                            </button>
+                            <button className="wordbank-btn" onClick={() => setScreen('letterSounds')}>
+                                🔤 Letter Sounds
                             </button>
                             <button className="start-btn" onClick={startDrill}>
                                 Let's go! →
@@ -1136,6 +1213,32 @@
                                                 ))}
                                             </div>
                                         )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (screen === 'letterSounds') {
+                return (
+                    <div className="container screen wordbank-screen">
+                        <div className="wordbank-header">
+                            <button className="nav-btn" onClick={() => setScreen('setup')}>← Back</button>
+                            <h2 className="wordbank-title">🔤 Letter Sounds</h2>
+                        </div>
+
+                        <div className="letter-grid">
+                            {letterSounds.map(item => {
+                                const match = item.english.match(/^(.*?)\s*\((.*)\)\s*$/);
+                                const sound = match ? match[1] : item.english;
+                                const example = match ? match[2] : '';
+                                return (
+                                    <div className="letter-card" key={item.finnish}>
+                                        <div className="letter-char">{item.finnish}</div>
+                                        <div className="letter-sound">{sound}</div>
+                                        {example && <div className="letter-example">{example}</div>}
                                     </div>
                                 );
                             })}
