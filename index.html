@@ -169,12 +169,12 @@
             margin-bottom: 2px;
         }
 
-        .option-btn-desc {
-            font-size: 9px;
-            font-weight: 400;
-            line-height: 1.2;
-            margin-top: 3px;
-            opacity: 0.75;
+        .mode-description {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: -6px;
+            margin-bottom: 12px;
         }
 
         .option-btn.active {
@@ -820,6 +820,12 @@
             {"finnish": "Ö", "english": "oeoe (Curl, girl, word)", "category": "Letter Sounds"},
         ];
 
+        const MODE_DESCRIPTIONS = {
+            english: 'Shows English word first',
+            finnish: 'Shows Finnish word first',
+            challenge: "Shows only words you haven't mastered"
+        };
+
         function FlashcardApp() {
             const [screen, setScreen] = useState('setup'); // 'setup', 'card', 'finish', 'wordbank', 'letterSounds'
             const [selectedCategories, setSelectedCategories] = useState([]);
@@ -1155,6 +1161,7 @@
 
                         <div className="setup-section">
                             <h2>🎯 Flashcard Mode</h2>
+                            <div className="mode-description">{MODE_DESCRIPTIONS[startLanguage]}</div>
                             <div className="option-group">
                                 <button
                                     className={`option-btn ${startLanguage === 'english' ? 'active' : ''}`}
@@ -1162,7 +1169,6 @@
                                 >
                                     <div className="option-btn-icon">🇬🇧</div>
                                     <div>English</div>
-                                    <div className="option-btn-desc">Shows English word first</div>
                                 </button>
                                 <button
                                     className={`option-btn ${startLanguage === 'finnish' ? 'active' : ''}`}
@@ -1170,7 +1176,6 @@
                                 >
                                     <div className="option-btn-icon">🇫🇮</div>
                                     <div>Finnish</div>
-                                    <div className="option-btn-desc">Shows Finnish word first</div>
                                 </button>
                                 <button
                                     className={`option-btn challenge ${startLanguage === 'challenge' ? 'active' : ''}`}
@@ -1178,7 +1183,6 @@
                                 >
                                     <div className="option-btn-icon">🔥</div>
                                     <div>Challenge Mode</div>
-                                    <div className="option-btn-desc">Shows only words you haven't mastered</div>
                                 </button>
                             </div>
                         </div>
