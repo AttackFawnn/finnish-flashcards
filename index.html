@@ -169,6 +169,14 @@
             margin-bottom: 2px;
         }
 
+        .option-btn-desc {
+            font-size: 9px;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-top: 3px;
+            opacity: 0.75;
+        }
+
         .option-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -222,8 +230,7 @@
             flex: 2;
             padding: 15px 6px;
             background: white;
-            color: #666;
-            border: 2px solid #aaa;
+            border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 12px;
             font-weight: 600;
@@ -233,9 +240,7 @@
         }
 
         .wordbank-btn:hover {
-            background: #888;
-            color: white;
-            border-color: #888;
+            border-color: #667eea;
         }
 
         /* Word Bank Screen */
@@ -488,13 +493,6 @@
             .card {
                 padding: 30px 15px;
             }
-        }
-
-        .flip-hint {
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            margin-top: 10px;
         }
 
         .action-buttons {
@@ -889,6 +887,10 @@
                             gotItCount: 0,
                             masteredStatus: false
                         };
+                    } else if (action === 'master') {
+                        // Manual override: the user is directly declaring this word
+                        // mastered, bypassing the Got-It streak requirement.
+                        entry = { ...existing, masteredStatus: true };
                     } else {
                         const gotItCount = existing.gotItCount + 1;
                         const threshold = existing.tryAgainCount === 0 ? 2 : 3;
@@ -1029,6 +1031,17 @@
                 setIsFlipped(false);
             };
 
+            const handleMasterCard = () => {
+                if (leavingCard) return;
+                const card = getCurrentCard();
+                selectAction('remove');
+                startLeaving('left');
+                updateWordProgress(card, 'master');
+                setRemoved(prev => prev + 1);
+                setDeck(prev => prev.slice(1));
+                setIsFlipped(false);
+            };
+
             const skipCard = () => {
                 if (leavingCard) return;
                 setDeck(prev => {
@@ -1148,14 +1161,16 @@
                                     onClick={() => setStartLanguage('english')}
                                 >
                                     <div className="option-btn-icon">🇬🇧</div>
-                                    <div>English First</div>
+                                    <div>English</div>
+                                    <div className="option-btn-desc">Shows English word first</div>
                                 </button>
                                 <button
                                     className={`option-btn ${startLanguage === 'finnish' ? 'active' : ''}`}
                                     onClick={() => setStartLanguage('finnish')}
                                 >
                                     <div className="option-btn-icon">🇫🇮</div>
-                                    <div>Finnish First</div>
+                                    <div>Finnish</div>
+                                    <div className="option-btn-desc">Shows Finnish word first</div>
                                 </button>
                                 <button
                                     className={`option-btn challenge ${startLanguage === 'challenge' ? 'active' : ''}`}
@@ -1163,6 +1178,7 @@
                                 >
                                     <div className="option-btn-icon">🔥</div>
                                     <div>Challenge Mode</div>
+                                    <div className="option-btn-desc">Shows only words you haven't mastered</div>
                                 </button>
                             </div>
                         </div>
@@ -1300,8 +1316,6 @@
                             )}
                         </div>
 
-                        <div className="flip-hint">tap to flip</div>
-
                         <div className="action-buttons">
                             <button className={`action-btn danger ${selectedAction === 'keep' ? 'selected' : ''}`} onClick={handleKeep}>
                                 ✗ Try again
@@ -1311,9 +1325,9 @@
                             </button>
                         </div>
 
-                        {!isChallengeMode && (
-                            <button className="challenge-link" onClick={startChallengeMode}>
-                                🔥 Try Challenge Mode?
+                        {card.direction === 'english' && (
+                            <button className="challenge-link" onClick={handleMasterCard}>
+                                ⭐ Mastered! Remove from challenge mode
                             </button>
                         )}
                     </div>
