@@ -123,6 +123,22 @@
             color: rgba(255,255,255,0.8);
         }
 
+        .reset-progress-link {
+            display: block;
+            margin: 4px auto 0;
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 12px;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .reset-progress-link:hover {
+            color: #e74c3c;
+        }
+
         .option-group {
             display: flex;
             gap: 10px;
@@ -153,20 +169,25 @@
             border-color: #667eea;
         }
 
+        .setup-divider {
+            border-top: 1px solid #e5e5e5;
+            margin-top: 20px;
+        }
+
         .setup-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-top: 20px;
         }
 
         .start-btn {
             flex: 3;
-            padding: 15px;
+            padding: 15px 8px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
@@ -180,17 +201,36 @@
             transform: translateY(0);
         }
 
+        .challenge-btn {
+            flex: 3;
+            padding: 15px 6px;
+            background: white;
+            color: #e67e22;
+            border: 2px solid #e67e22;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.3;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .challenge-btn:hover {
+            background: #e67e22;
+            color: white;
+        }
+
         .wordbank-btn {
             flex: 2;
-            padding: 15px 10px;
+            padding: 15px 6px;
             background: white;
             color: #667eea;
             border: 2px solid #667eea;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
+            line-height: 1.3;
             cursor: pointer;
-            white-space: nowrap;
             transition: all 0.2s;
         }
 
@@ -427,6 +467,23 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
+        }
+
+        .challenge-link {
+            display: block;
+            margin: 15px auto 0;
+            background: none;
+            border: none;
+            color: #e67e22;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .challenge-link:hover {
+            color: #c96a15;
         }
 
         .action-btn {
@@ -716,12 +773,77 @@
             const [selectedAction, setSelectedAction] = useState(null); // null, 'remove', 'keep'
             const selectedTimeoutRef = useRef(null);
             const [expandedCategories, setExpandedCategories] = useState([]);
+            const [isChallengeMode, setIsChallengeMode] = useState(false);
+            const [progress, setProgress] = useState(() => {
+                try {
+                    const raw = localStorage.getItem('finnishFlashcardProgress');
+                    return raw ? JSON.parse(raw) : {};
+                } catch (e) {
+                    return {};
+                }
+            });
 
             const categories = [...new Set(VOCAB_DATA.map(item => item.category))].sort();
-            
+
             // Count words in each category
             const getCategoryCount = (category) => {
                 return VOCAB_DATA.filter(item => item.category === category).length;
+            };
+
+            const getWordKey = (word) => `${word.category}|${word.finnish}`;
+
+            const isWordMastered = (word) => {
+                const entry = progress[getWordKey(word)];
+                return !!(entry && entry.masteredStatus);
+            };
+
+            // Mastery only tracked for words displayed English-first. "Got It" builds a
+            // streak toward mastery (2 in a row normally, 3 after ever missing one);
+            // "Try Again" breaks the streak and un-masters the word immediately.
+            const updateWordProgress = (word, action) => {
+                if (!word || word.direction !== 'english') return;
+
+                const key = getWordKey(word);
+                setProgress(prev => {
+                    const existing = prev[key] || {
+                        displayedWithLanguage: 'english',
+                        gotItCount: 0,
+                        tryAgainCount: 0,
+                        masteredStatus: false
+                    };
+
+                    let entry;
+                    if (action === 'tryAgain') {
+                        entry = {
+                            ...existing,
+                            tryAgainCount: existing.tryAgainCount + 1,
+                            gotItCount: 0,
+                            masteredStatus: false
+                        };
+                    } else {
+                        const gotItCount = existing.gotItCount + 1;
+                        const threshold = existing.tryAgainCount === 0 ? 2 : 3;
+                        entry = {
+                            ...existing,
+                            gotItCount,
+                            masteredStatus: existing.masteredStatus || gotItCount >= threshold
+                        };
+                    }
+
+                    const next = { ...prev, [key]: entry };
+                    try {
+                        localStorage.setItem('finnishFlashcardProgress', JSON.stringify(next));
+                    } catch (e) {}
+                    return next;
+                });
+            };
+
+            const resetProgress = () => {
+                if (!window.confirm('Are you sure? This will reset all your progress.')) return;
+                setProgress({});
+                try {
+                    localStorage.removeItem('finnishFlashcardProgress');
+                } catch (e) {}
             };
 
             const toggleCategory = (category) => {
@@ -750,16 +872,9 @@
                     selectedCategories.includes(item.category)
                 );
 
-                // Shuffle the deck and lock in each card's display direction
-                // up front, so 'random' mode doesn't re-roll (and re-color) on every render
                 const shuffled = [...filtered]
                     .sort(() => Math.random() - 0.5)
-                    .map(item => ({
-                        ...item,
-                        direction: startLanguage === 'random'
-                            ? (Math.random() > 0.5 ? 'finnish' : 'english')
-                            : startLanguage
-                    }));
+                    .map(item => ({ ...item, direction: startLanguage }));
                 setDeck(shuffled);
                 setTotalCount(shuffled.length);
                 setIsFlipped(false);
@@ -767,6 +882,38 @@
                 setRemoved(0);
                 setLeavingCard(null);
                 setSelectedAction(null);
+                setIsChallengeMode(false);
+                setScreen('card');
+            };
+
+            const startChallengeMode = () => {
+                if (selectedCategories.length === 0) {
+                    alert('Please select at least one category');
+                    return;
+                }
+
+                const filtered = VOCAB_DATA.filter(item =>
+                    selectedCategories.includes(item.category) && !isWordMastered(item)
+                );
+
+                if (filtered.length === 0) {
+                    alert('All words mastered! Select another category or reset.');
+                    return;
+                }
+
+                // Challenge Mode always drills English-first, since mastery is only
+                // ever tracked for English-first cards.
+                const shuffled = [...filtered]
+                    .sort(() => Math.random() - 0.5)
+                    .map(item => ({ ...item, direction: 'english' }));
+                setDeck(shuffled);
+                setTotalCount(shuffled.length);
+                setIsFlipped(false);
+                setKept(0);
+                setRemoved(0);
+                setLeavingCard(null);
+                setSelectedAction(null);
+                setIsChallengeMode(true);
                 setScreen('card');
             };
 
@@ -785,8 +932,10 @@
 
             const handleKeep = () => {
                 if (leavingCard) return;
+                const card = getCurrentCard();
                 selectAction('keep');
                 startLeaving('sink');
+                updateWordProgress(card, 'tryAgain');
                 setKept(prev => prev + 1);
                 setDeck(prev => {
                     const [first, ...rest] = prev;
@@ -797,8 +946,10 @@
 
             const handleRemove = () => {
                 if (leavingCard) return;
+                const card = getCurrentCard();
                 selectAction('remove');
                 startLeaving('left');
+                updateWordProgress(card, 'gotIt');
                 setRemoved(prev => prev + 1);
                 setDeck(prev => prev.slice(1));
                 setIsFlipped(false);
@@ -817,6 +968,7 @@
                 setScreen('setup');
                 setSelectedCategories([]);
                 setStartLanguage('finnish');
+                setIsChallengeMode(false);
             };
 
             useEffect(() => {
@@ -898,7 +1050,7 @@
                 return (
                     <div className="container screen">
                         <div className="setup-section">
-                            <h2>📚 Select Categories</h2>
+                            <h2>📚 Select Categories for Flashcards</h2>
                             <div className="category-grid">
                                 {categories.map(category => (
                                     <button
@@ -912,35 +1064,37 @@
                                     </button>
                                 ))}
                             </div>
+                            <button className="reset-progress-link" onClick={resetProgress}>
+                                🗑️ Reset Progress
+                            </button>
                         </div>
 
                         <div className="setup-section">
-                            <h2>🎯 Start With</h2>
+                            <h2>🎯 Card Format</h2>
                             <div className="option-group">
                                 <button
                                     className={`option-btn ${startLanguage === 'finnish' ? 'active' : ''}`}
                                     onClick={() => setStartLanguage('finnish')}
                                 >
-                                    🇫🇮 Finnish
+                                    🇫🇮 Finnish First
                                 </button>
                                 <button
                                     className={`option-btn ${startLanguage === 'english' ? 'active' : ''}`}
                                     onClick={() => setStartLanguage('english')}
                                 >
-                                    🇬🇧 English
-                                </button>
-                                <button
-                                    className={`option-btn ${startLanguage === 'random' ? 'active' : ''}`}
-                                    onClick={() => setStartLanguage('random')}
-                                >
-                                    🎲 Mixed
+                                    🇬🇧 English First
                                 </button>
                             </div>
                         </div>
 
+                        <div className="setup-divider"></div>
+
                         <div className="setup-actions">
                             <button className="start-btn" onClick={startDrill}>
                                 Let's go! →
+                            </button>
+                            <button className="challenge-btn" onClick={startChallengeMode}>
+                                🔥 Challenge Mode
                             </button>
                             <button className="wordbank-btn" onClick={() => setScreen('wordbank')}>
                                 📖 Word Bank
@@ -1012,7 +1166,7 @@
                                 <button className="nav-btn" onClick={skipCard}>skip</button>
                             </div>
                             <div className="progress-info">
-                                {deck.length} card{deck.length === 1 ? '' : 's'} left
+                                {isChallengeMode && '🔥 '}{deck.length} card{deck.length === 1 ? '' : 's'} left
                             </div>
                         </div>
 
@@ -1046,6 +1200,12 @@
                                 ✓ Got it!
                             </button>
                         </div>
+
+                        {!isChallengeMode && (
+                            <button className="challenge-link" onClick={startChallengeMode}>
+                                🔥 Try Challenge Mode?
+                            </button>
+                        )}
                     </div>
                 );
             }
@@ -1075,6 +1235,11 @@
                             <button className="restart-btn" onClick={restartDrill}>
                                 ← Back to Setup
                             </button>
+                            {!isChallengeMode && (
+                                <button className="challenge-link" onClick={startChallengeMode}>
+                                    🔥 Try Challenge Mode?
+                                </button>
+                            )}
                         </div>
                     </div>
                 );
